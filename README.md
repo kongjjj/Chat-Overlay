@@ -8,7 +8,7 @@
 
 - ✔️ Twitch、Youtube聊天室顯示。
 - ✔️ Text-to-Speech聊天訊息朗讀。
-
+- ✔️ 3種語言選擇,繁體中文、英文、日文。
 
 
 
