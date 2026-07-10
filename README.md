@@ -6,3 +6,22 @@
 ## 功能
 
 - ✔️ Twitch，Youtube聊天室顯示。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 安裝方法
+我會在 [GitHub releases](https://github.com/kongjjj/Chat-Overlay/releases) 內發布最新 .apk 檔案。
+
+可以在手機上開啟 GitHub 發行頁面，下載 .apk 檔案並安裝。 
