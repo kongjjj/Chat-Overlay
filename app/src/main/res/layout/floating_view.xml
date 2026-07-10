@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_container"
+    android:layout_width="320dp"
+    android:layout_height="180dp"
+    android:background="@android:color/transparent">
+
+    <!-- Overlay Border (Visible only when dragging/resizing) -->
+    <View
+        android:id="@+id/overlay_border"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/floating_window_border"
+        android:visibility="gone" />
+
+    <!-- Main Content Container (to separate from floating icon) -->
+    <FrameLayout
+        android:id="@+id/main_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <WebView
+            android:id="@+id/floating_webview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent" />
+
+        <!-- Drag handle (Centered triple line indicator) -->
+        <LinearLayout
+            android:id="@+id/drag_handle"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:background="@android:color/transparent">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="18dp"
+                android:src="@drawable/drag_handle_indicator"
+                android:alpha="1.0"
+                android:contentDescription="Drag" />
+        </LinearLayout>
+
+        <!-- Top Controls -->
+        <FrameLayout
+            android:id="@+id/top_controls_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="4dp">
+
+            <!-- Minimize to icon button (Top Left) -->
+            <ImageView
+                android:id="@+id/btn_collapse"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="top|start"
+                android:padding="6dp"
+                android:src="@android:drawable/ic_menu_send"
+                android:rotation="180"
+                android:tint="#1A1A1A"
+                android:contentDescription="Collapse"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <!-- Restore/Close button (Top Right) -->
+            <ImageView
+                android:id="@+id/btn_restore"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="top|end"
+                android:padding="4dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:tint="#1A1A1A"
+                android:contentDescription="Restore"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </FrameLayout>
+
+        <!-- Resize handle (bottom right) -->
+        <ImageView
+            android:id="@+id/resize_handle"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="bottom|end"
+            android:src="@android:drawable/ic_menu_crop"
+            android:tint="#1A1A1A"
+            android:contentDescription="Resize"
+            android:clickable="true"
+            android:focusable="true" />
+    </FrameLayout>
+
+    <!-- Minimized Icon (Visible when overlay is collapsed) -->
+    <!-- Placed last to ensure it's on top and clickable -->
+    <ImageView
+        android:id="@+id/minimized_icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:src="@mipmap/ic_launcher"
+        android:background="@drawable/circular_button_bg"
+        android:padding="10dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true" />
+
+</FrameLayout>

@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Chat Overlay</string>
+    <string name="settings">設定</string>
+    <string name="instruction">使用說明</string>
+    <string name="version_info">版本資訊</string>
+    <string name="menu_button_desc">選單</string>
+    <string name="minimize_button_desc">最小化</string>
+    <string name="created_by">製作人：kongjjj</string>   <!-- 請替換為實際製作人 -->
+    <string name="foreground_service_special_use_description">用於顯示可拖動的懸浮圖標，點擊後恢復應用主界面。</string>
+    <string name="instruction_dialog_title">使用說明</string>
+    <string name="instruction_dialog_message">到https://streamelements.com/新增一個Chat overlay (Stream tools > Your stream\'s chat)，大小為730px X 360px，過大會走出畫面。</string>
+    <string name="ok">確定</string>
+    <string name="cancel">取消</string>
+    <string name="save">保存</string>
+    <string name="version_format">版本名稱：%s 版本代碼：%d</string>
+    <string name="settings_title">設置Overlay網址</string>
+    <string name="permission_denied">懸浮窗權限被拒絕，無法最小化</string>
+    <string name="request_permission">請先允許懸浮窗權限</string>
+    <string name="open_overlay">開啟OVERLAY</string>
+    <string name="exit_app">結束程式</string>
+</resources>

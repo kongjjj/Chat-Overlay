@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:visibility="gone" />
+
+    <!-- 左上角圆形三点菜单按钮 -->
+    <ImageButton
+        android:id="@+id/btn_menu"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:src="@android:drawable/ic_menu_more"
+        android:background="@drawable/circular_button_bg"
+        android:scaleType="centerInside"
+        android:contentDescription="@string/menu_button_desc" />
+
+    <!-- 右上角開啟OVERLAY長方形按鈕 -->
+    <Button
+        android:id="@+id/btn_minimize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/open_overlay"
+        android:textColor="@color/dark_text"
+        android:background="@drawable/rect_button_bg"
+        android:contentDescription="@string/minimize_button_desc" />
+
+</RelativeLayout>

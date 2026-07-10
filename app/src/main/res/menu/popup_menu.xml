@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/settings" />
+    <item
+        android:id="@+id/action_instruction"
+        android:title="@string/instruction" />
+    <item
+        android:id="@+id/action_version_info"
+        android:title="@string/version_info" />
+    <item
+        android:id="@+id/action_exit"
+        android:title="@string/exit_app" />
+</menu>
