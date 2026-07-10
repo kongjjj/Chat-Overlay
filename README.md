@@ -5,4 +5,4 @@
 
 ## 功能
 
-- ✔️ RTMP 推流直播，Twitch 直接推流。
+- ✔️ Twitch，Youtube聊天室顯示。
