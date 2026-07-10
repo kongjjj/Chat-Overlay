@@ -9,6 +9,8 @@ Transparent Chat viewer app for IRL streaming
 - ✔️ Display in Twitch and YouTube chatrooms.
 - ✔️ Text-to-Speech reading of chat messages.
 - ✔️ 3 language options: Traditional Chinese, English, and Japanese.
+- ✔️ Font size, line spacing, usernames, and emoji size can be adjusted individually.
+- ✔️ The transparent chat box can be freely moved and resized.
 
 
 ![Chat-Overlay](pics/Screenshot_1EN.jpg)
