@@ -18,6 +18,7 @@ Transparent Chat viewer app for IRL streaming
 
 
 ## Usage
+![Chat-Overlay](pics/Screenshot_3E.jpg)
 - The screen view when used with live streaming software such as IRL PRO.
 ![Chat-Overlay](pics/Screenshot_2.jpg)
 
