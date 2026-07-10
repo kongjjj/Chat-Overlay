@@ -1,2 +1,2 @@
-# Chat-Overlay   [English](https://github.com/ThibaultBee/StreamPack-boilerplate)
+# Chat-Overlay   [English](README_EN.md)
 Transparent Chat app for IRL streaming
