@@ -15,6 +15,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ChatOverlayTheme {
                 var showSettings by remember { mutableStateOf(false) }
+                var showLanguageDialog by remember { mutableStateOf(false) }
                 val chatManager = remember { ChatManager.getInstance(applicationContext) }
                 
                 val twitchChannel by chatManager.twitchChannel.collectAsState()
@@ -89,49 +91,37 @@ class MainActivity : ComponentActivity() {
                             Text(getLabel("Settings", appLanguage))
                         }
 
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        // App Language Selector in Main Screen
-                        Column(
-                            modifier = Modifier.width(IntrinsicSize.Max),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        OutlinedButton(
+                            onClick = { showLanguageDialog = true },
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                text = getLabel("App Language", appLanguage),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            
-                            var expanded by remember { mutableStateOf(false) }
-                            val appLanguages = listOf("zh-TW" to "繁體中文", "en" to "English", "ja" to "日本語")
-                            val currentAppLangName = appLanguages.find { it.first == appLanguage }?.second ?: appLanguage
+                            Text(getLabel("App Language", appLanguage))
+                        }
 
-                            Box {
-                                Row(
-                                    modifier = Modifier
-                                        .clickable { expanded = true }
-                                        .padding(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text(currentAppLangName, style = MaterialTheme.typography.bodyMedium)
-                                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                                }
-                                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                                    appLanguages.forEach { (code, name) ->
-                                        DropdownMenuItem(
-                                            text = { Text(name) },
-                                            onClick = {
-                                                chatManager.saveAppLanguage(code, this@MainActivity)
-                                                expanded = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedButton(
+                            onClick = { finishAffinity() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(getLabel("Exit App", appLanguage))
                         }
                     }
                     
+                    if (showLanguageDialog) {
+                        LanguageSelectionDialog(
+                            currentLanguage = appLanguage,
+                            onLanguageSelected = { code ->
+                                chatManager.saveAppLanguage(code, this@MainActivity)
+                                showLanguageDialog = false
+                            },
+                            onDismiss = { showLanguageDialog = false },
+                            appLanguage = appLanguage
+                        )
+                    }
+
                     if (showSettings) {
                         SettingsDialog(
                             twitchChannel = twitchChannel,
@@ -201,8 +191,53 @@ class MainActivity : ComponentActivity() {
         val labels = mapOf(
             "Open Floating Chat" to mapOf("zh-TW" to "開啟懸浮聊天室", "en" to "Open Floating Chat", "ja" to "フローティングチャットを開く"),
             "Settings" to mapOf("zh-TW" to "設定", "en" to "Settings", "ja" to "設定"),
-            "App Language" to mapOf("zh-TW" to "App 語言", "en" to "App Language", "ja" to "アプリの言語")
+            "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの言語"),
+            "Exit App" to mapOf("zh-TW" to "關閉程式", "en" to "Close App", "ja" to "アプリを終了"),
+            "Close" to mapOf("zh-TW" to "關閉", "en" to "Close", "ja" to "閉じる")
         )
         return labels[key]?.get(lang) ?: key
     }
+}
+
+@Composable
+fun LanguageSelectionDialog(
+    currentLanguage: String,
+    onLanguageSelected: (String) -> Unit,
+    onDismiss: () -> Unit,
+    appLanguage: String
+) {
+    val languages = listOf("zh-TW" to "繁體中文", "en" to "English", "ja" to "日本語")
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(getLabel("App Language", appLanguage)) },
+        text = {
+            Column {
+                languages.forEach { (code, name) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onLanguageSelected(code) }
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(name, style = MaterialTheme.typography.bodyLarge)
+                        if (code == currentLanguage) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selected",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(getLabel("Close", appLanguage))
+            }
+        }
+    )
 }

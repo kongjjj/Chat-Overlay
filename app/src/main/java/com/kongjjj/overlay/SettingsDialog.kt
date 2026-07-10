@@ -354,7 +354,7 @@ fun getLabel(key: String, lang: String): String {
         "Animated Emotes" to mapOf("zh-TW" to "動態表情符號", "en" to "Animated Emotes", "ja" to "アニメーションエモート"),
         "Show GIF as animated images" to mapOf("zh-TW" to "將 GIF 顯示為動態圖片", "en" to "Show GIF as animated images", "ja" to "GIFをアニメーション画像として表示"),
         "Emote Sources" to mapOf("zh-TW" to "表情符號來源", "en" to "Emote Sources", "ja" to "エモートソース"),
-        "App Language" to mapOf("zh-TW" to "App 語言", "en" to "App Language", "ja" to "アプリの言語")
+        "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの言語")
     )
     return labels[key]?.get(lang) ?: key
 }
