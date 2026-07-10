@@ -11,7 +11,7 @@ Transparent Chat app for IRL streaming
 - ✔️ 3 language options: Traditional Chinese, English, and Japanese.
 
 
-![Chat-Overlay](pics/Screenshot_1C.jpg)
+![Chat-Overlay](pics/Screenshot_1EN.jpg)
 
 
 
