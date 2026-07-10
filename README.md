@@ -6,8 +6,8 @@
 
 ## 功能
 
-- ✔️ Twitch，Youtube聊天室顯示。
-
+- ✔️ Twitch、Youtube聊天室顯示。
+- ✔️ Text-to-Speech聊天訊息朗讀。
 
 
 
