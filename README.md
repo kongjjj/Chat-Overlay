@@ -13,7 +13,7 @@
 
 
 ![Chat-Overlay](pics/Screenshot_1.jpg)
-![Chat-Overlay](pics/Screenshot_2.jpg)
+
 
 
 
