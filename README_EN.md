@@ -6,10 +6,9 @@ Transparent Chat app for IRL streaming
 
 ## Features
 
-- ✔️ Twitch、Youtube聊天室顯示。
-- ✔️ Text-to-Speech聊天訊息朗讀。
-- ✔️ 3種語言選擇,繁體中文、英文、日文。
-
+- ✔️ Display in Twitch and YouTube chatrooms.
+- ✔️ Text-to-Speech reading of chat messages.
+- ✔️ 3 language options: Traditional Chinese, English, and Japanese.
 
 
 ![Chat-Overlay](pics/Screenshot_1C.jpg)
@@ -23,7 +22,7 @@ Transparent Chat app for IRL streaming
 
 
 
-## 安裝方法
-我會在 [GitHub releases](https://github.com/kongjjj/Chat-Overlay/releases) 內發布最新 .apk 檔案。
+## Installation Method
+I will publish the latest .apk file in the [GitHub releases](https://github.com/kongjjj/Chat-Overlay/releases) 
 
-可以在手機上開啟 GitHub 發行頁面，下載 .apk 檔案並安裝。 
+You can open the GitHub releases page on your phone, download the .apk file, and install it.
