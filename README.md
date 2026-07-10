@@ -18,6 +18,7 @@
 
 
 ## 使用方法
+![Chat-Overlay](pics/Screenshot_3C.jpg)
 - 配合IRL PRO等直播軟件使用時的畫面。
 ![Chat-Overlay](pics/Screenshot_2.jpg)
 
