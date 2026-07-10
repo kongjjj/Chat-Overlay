@@ -16,8 +16,9 @@
 
 
 
-
-
+## 使用方法
+配合IRL PRO使用時
+![Chat-Overlay](pics/Screenshot_2.jpg)
 
 
 
