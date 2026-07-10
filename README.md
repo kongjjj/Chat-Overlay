@@ -8,8 +8,9 @@
 
 - ✔️ Twitch、Youtube聊天室顯示。
 - ✔️ Text-to-Speech聊天訊息朗讀。
-- ✔️ 3種語言選擇,繁體中文、英文、日文。
-
+- ✔️ 3種語言選擇，繁體中文、英文、日文。
+- ✔️ 文字大小，行距可調較。
+- ✔️ 聊天方塊可任意移動和調整大小。
 
 
 ![Chat-Overlay](pics/Screenshot_1C.jpg)
