@@ -1,7 +1,7 @@
 # ![Chat-Overlay](pics/Logo.png) Chat-Overlay   
 [Chinese](README.md)
 
-Transparent Chat app for IRL streaming
+Transparent Chat viewer app for IRL streaming
 
 
 ## Features
