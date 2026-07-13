@@ -52,13 +52,10 @@
             <!-- Minimize to icon button (Top Left) -->
             <ImageView
                 android:id="@+id/btn_collapse"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_gravity="top|start"
-                android:padding="6dp"
-                android:src="@android:drawable/ic_menu_send"
-                android:rotation="180"
-                android:tint="#1A1A1A"
+                android:src="@drawable/ic_back"
                 android:contentDescription="Collapse"
                 android:clickable="true"
                 android:focusable="true" />
@@ -66,12 +63,10 @@
             <!-- Restore/Close button (Top Right) -->
             <ImageView
                 android:id="@+id/btn_restore"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_gravity="top|end"
-                android:padding="4dp"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
-                android:tint="#1A1A1A"
+                android:src="@drawable/ic_close"
                 android:contentDescription="Restore"
                 android:clickable="true"
                 android:focusable="true" />
@@ -81,11 +76,10 @@
         <!-- Resize handle (bottom right) -->
         <ImageView
             android:id="@+id/resize_handle"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_gravity="bottom|end"
-            android:src="@android:drawable/ic_menu_crop"
-            android:tint="#1A1A1A"
+            android:src="@drawable/ic_resize"
             android:contentDescription="Resize"
             android:clickable="true"
             android:focusable="true" />
