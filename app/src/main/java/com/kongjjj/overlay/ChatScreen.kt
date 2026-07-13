@@ -47,6 +47,7 @@ fun ChatScreen(
     chatEmoteSize: Float,
     chatUsernameSize: Float,
     animatedEmotes: Boolean,
+    showChrome: Boolean = true,
     onConnect: () -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -102,7 +103,7 @@ fun ChatScreen(
     Column(modifier = Modifier.fillMaxSize()) {
 
         // ── Status row ────────────────────────────────────────────────────────
-        if (twitchChannel.isNotEmpty() || youtubeChannelId.isNotEmpty()) {
+        if (showChrome && (twitchChannel.isNotEmpty() || youtubeChannelId.isNotEmpty())) {
             Surface(tonalElevation = 2.dp, color = Color.Transparent) {
                 Row(
                     modifier = Modifier
@@ -111,6 +112,9 @@ fun ChatScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    // Added spacer to avoid overlap with the ic_back button (25dp)
+                    Spacer(modifier = Modifier.width(28.dp))
+
                     Column(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.weight(1f)
@@ -124,7 +128,7 @@ fun ChatScreen(
                                     modifier = Modifier
                                         .size(8.dp)
                                         .background(
-                                            color = if (chatConnected) Color(0xFF4CAF50) else Color(0xFF9E9E9E),
+                                            color = if (chatConnected) Color(0xFF9146FF) else Color(0xFF9E9E9E),
                                             shape = CircleShape
                                         )
                                 )
@@ -159,6 +163,9 @@ fun ChatScreen(
                     if (!chatConnected) {
                         TextButton(onClick = onConnect) { Text("Reconnect") }
                     }
+
+                    // Added spacer to avoid overlap with the ic_close button (25dp)
+                    Spacer(modifier = Modifier.width(28.dp))
                 }
             }
             HorizontalDivider()
