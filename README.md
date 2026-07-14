@@ -20,10 +20,10 @@
 
 ## 使用方法
 ![Chat-Overlay](pics/Screenshot_3C.jpg)
-- 配合IRL PRO等直播軟件使用時的畫面。
-![Chat-Overlay](pics/Screenshot_2.jpg)
-
-
+- 配合其他直播軟件使用時的畫面。UI未消失時。
+![Chat-Overlay](pics/Screenshot_4.jpg)
+- UI消失後。
+![Chat-Overlay](pics/Screenshot_5.jpg)
 
 
 
