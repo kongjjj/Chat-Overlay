@@ -19,7 +19,7 @@
 
 
 ## 使用方法
-![Chat-Overlay](pics/Screenshot_3C.jpg)
+![Chat-Overlay](pics/Screenshot_6C.jpg)
 - 配合其他直播軟件使用時的畫面。UI未消失時。
 ![Chat-Overlay](pics/Screenshot_4.jpg)
 - UI消失後。
