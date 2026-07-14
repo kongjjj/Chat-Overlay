@@ -14,7 +14,7 @@
 - ✔️ UI在3秒後會自動隱藏，只剩下留言部份顯示，按1下留言左半部份，可恢復UI顯示。
 下圖是舊有UI,並未更新
 
-![Chat-Overlay](pics/Screenshot_1C.jpg)
+![Chat-Overlay](pics/Screenshot_7C.jpg)
 
 
 
