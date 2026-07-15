@@ -315,18 +315,23 @@ private fun scanThirdPartyWords(text: String, emotes: Map<String, String>): List
     val escapedKeys = emotes.keys.filter { it.length >= 2 }.map { Regex.escape(it) }.sortedByDescending { it.length }
     if (escapedKeys.isEmpty()) return listOf(MessageSegment.TextPart(text))
     
-    val pattern = escapedKeys.joinToString("|").toRegex()
+    // Wrap the pattern with word boundaries or space check to ensure standalone words.
+    // Use negative lookbehind/lookahead for non-whitespace to cover start/end of string and actual spaces.
+    val pattern = "(?<!\\S)(${escapedKeys.joinToString("|")})(?!\\S)".toRegex()
     val result = mutableListOf<MessageSegment>()
     var cursor = 0
 
     pattern.findAll(text).forEach { match ->
-        if (match.range.first > cursor) {
-            result.add(MessageSegment.TextPart(text.substring(cursor, match.range.first)))
+        // The regex includes lookbehind/lookahead but the group 1 is just the emote name
+        val matchRange = match.groups[1]?.range ?: match.range
+        
+        if (matchRange.first > cursor) {
+            result.add(MessageSegment.TextPart(text.substring(cursor, matchRange.first)))
         }
-        val word = match.value
+        val word = match.groups[1]?.value ?: match.value
         val url = emotes[word]!!
         result.add(MessageSegment.EmotePart(word, url))
-        cursor = match.range.last + 1
+        cursor = matchRange.last + 1
     }
 
     if (cursor < text.length) {
