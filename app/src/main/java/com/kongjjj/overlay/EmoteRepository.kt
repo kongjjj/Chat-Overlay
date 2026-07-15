@@ -299,37 +299,49 @@ fun parseMessageSegments(
         if (tail.isNotEmpty()) stage1.add(MessageSegment.TextPart(tail))
     }
 
+    // Stage 2: YouTube Emotes (No strict boundaries)
     val stage2 = stage1.flatMap { seg ->
-        if (seg is MessageSegment.TextPart) scanThirdPartyWords(seg.text, allEmotes)
+        if (seg is MessageSegment.TextPart) scanWords(seg.text, youtubeEmotes, useStrictBoundaries = false)
         else listOf(seg)
     }
 
-    return stage2.flatMap { seg ->
+    // Stage 3: Third-party Emotes (Strict boundaries)
+    val stage3 = stage2.flatMap { seg ->
+        if (seg is MessageSegment.TextPart) scanWords(seg.text, thirdPartyEmotes, useStrictBoundaries = true)
+        else listOf(seg)
+    }
+
+    return stage3.flatMap { seg ->
         if (seg is MessageSegment.TextPart) scanForLinks(seg.text)
         else listOf(seg)
     }
 }
 
-private fun scanThirdPartyWords(text: String, emotes: Map<String, String>): List<MessageSegment> {
+private fun scanWords(text: String, emotes: Map<String, String>, useStrictBoundaries: Boolean): List<MessageSegment> {
     if (emotes.isEmpty()) return listOf(MessageSegment.TextPart(text))
     val escapedKeys = emotes.keys.filter { it.length >= 2 }.map { Regex.escape(it) }.sortedByDescending { it.length }
     if (escapedKeys.isEmpty()) return listOf(MessageSegment.TextPart(text))
     
-    // Wrap the pattern with word boundaries or space check to ensure standalone words.
-    // Use negative lookbehind/lookahead for non-whitespace to cover start/end of string and actual spaces.
-    val pattern = "(?<!\\S)(${escapedKeys.joinToString("|")})(?!\\S)".toRegex()
+    val pattern = if (useStrictBoundaries) {
+        "(?<!\\S)(${escapedKeys.joinToString("|")})(?!\\S)".toRegex()
+    } else {
+        "(${escapedKeys.joinToString("|")})".toRegex()
+    }
+
     val result = mutableListOf<MessageSegment>()
     var cursor = 0
 
     pattern.findAll(text).forEach { match ->
-        // The regex includes lookbehind/lookahead but the group 1 is just the emote name
-        val matchRange = match.groups[1]?.range ?: match.range
+        // Group 1 is always the emote name because we wrapped the entire alternation in ()
+        val group = match.groups[1] ?: return@forEach
+        val matchRange = group.range
         
         if (matchRange.first > cursor) {
             result.add(MessageSegment.TextPart(text.substring(cursor, matchRange.first)))
         }
-        val word = match.groups[1]?.value ?: match.value
-        val url = emotes[word]!!
+        
+        val word = group.value
+        val url = emotes[word] ?: return@forEach
         result.add(MessageSegment.EmotePart(word, url))
         cursor = matchRange.last + 1
     }

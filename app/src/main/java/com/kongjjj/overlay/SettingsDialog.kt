@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
@@ -133,6 +134,7 @@ fun SettingsContent(
 ) {
     var channelInput by remember(twitchChannel) { mutableStateOf(twitchChannel) }
     var youtubeInput by remember(youtubeChannelId) { mutableStateOf(youtubeChannelId) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -152,12 +154,14 @@ fun SettingsContent(
                     keyboardActions = KeyboardActions(onDone = {
                         val trimmed = channelInput.trim().lowercase()
                         onSaveChannel(trimmed)
+                        keyboardController?.hide()
                     })
                 )
                 FilledTonalButton(
                     onClick = {
                         val trimmed = channelInput.trim().lowercase()
                         onSaveChannel(trimmed)
+                        keyboardController?.hide()
                     }
                 ) { Text(getLabel("Save", appLanguage)) }
             }
@@ -177,12 +181,14 @@ fun SettingsContent(
                     keyboardActions = KeyboardActions(onDone = {
                         val trimmed = youtubeInput.trim()
                         onSaveYoutubeChannelId(trimmed)
+                        keyboardController?.hide()
                     })
                 )
                 FilledTonalButton(
                     onClick = {
                         val trimmed = youtubeInput.trim()
                         onSaveYoutubeChannelId(trimmed)
+                        keyboardController?.hide()
                     }
                 ) { Text(getLabel("Save", appLanguage)) }
             }
