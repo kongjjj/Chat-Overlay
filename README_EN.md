@@ -22,7 +22,7 @@ Transparent Chat viewer app for IRL streaming
 ![Chat-Overlay](pics/Screenshot_3E.jpg)
 - The screen view when used with live streaming software.Before UI Disappears.
 ![Chat-Overlay](pics/Screenshot_4.jpg)
-- After UI Disappears
+- After UI Disappears.
 ![Chat-Overlay](pics/Screenshot_5.jpg)
 
 
