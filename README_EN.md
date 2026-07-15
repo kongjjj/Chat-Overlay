@@ -11,6 +11,7 @@ Transparent Chat viewer app for IRL streaming
 - ✔️ 3 language options: Traditional Chinese, English, and Japanese.
 - ✔️ Font size, line spacing, usernames, and emoji size can be adjusted individually.
 - ✔️ The transparent chat box can be freely moved and resized.
+- ✔️ The UI will automatically hide after 3 seconds, and only the comment section will remain visible. Clicking the left half of the comment section will bring back the UI.
 
 
 ![Chat-Overlay](pics/Screenshot_1EN.jpg)
