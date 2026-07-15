@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
                 
                 val backgroundColor by chatManager.backgroundColor.collectAsState()
                 val appLanguage by chatManager.appLanguage.collectAsState()
+                val showTimestamp by chatManager.showTimestamp.collectAsState()
                 val ttsEnabled by chatManager.ttsEnabled.collectAsState()
                 val ttsLanguage by chatManager.ttsLanguage.collectAsState()
                 val ttsIgnoreSender by chatManager.ttsIgnoreSender.collectAsState()
@@ -136,6 +137,7 @@ class MainActivity : ComponentActivity() {
                             enableFfz = chatManager.enableFfz.collectAsState().value,
                             backgroundColor = backgroundColor,
                             appLanguage = appLanguage,
+                            showTimestamp = showTimestamp,
                             ttsEnabled = ttsEnabled,
                             ttsLanguage = ttsLanguage,
                             ttsIgnoreSender = ttsIgnoreSender,
@@ -150,6 +152,7 @@ class MainActivity : ComponentActivity() {
                             onEnableBttvChange = { chatManager.saveEnableBttv(it, this@MainActivity) },
                             onEnableFfzChange = { chatManager.saveEnableFfz(it, this@MainActivity) },
                             onBackgroundColorChange = { chatManager.saveBackgroundColor(it, this@MainActivity) },
+                            onShowTimestampChange = { chatManager.saveShowTimestamp(it, this@MainActivity) },
                             onTtsEnabledChange = { chatManager.saveTtsEnabled(it, this@MainActivity) },
                             onTtsLanguageChange = { chatManager.saveTtsLanguage(it, this@MainActivity) },
                             onTtsIgnoreSenderChange = { chatManager.saveTtsIgnoreSender(it, this@MainActivity) },

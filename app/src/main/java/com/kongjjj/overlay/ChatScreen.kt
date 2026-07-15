@@ -47,48 +47,51 @@ fun ChatScreen(
     chatEmoteSize: Float,
     chatUsernameSize: Float,
     animatedEmotes: Boolean,
+    showTimestamp: Boolean = false,
     showChrome: Boolean = true,
     onConnect: () -> Unit
 ) {
     val listState = rememberLazyListState()
+    var lastItemCount by remember { mutableIntStateOf(0) }
+    var forceScrollToBottom by remember { mutableStateOf(false) }
 
     // Auto-connect when a channel is configured
     LaunchedEffect(twitchChannel, youtubeChannelId) {
         if (twitchChannel.isNotEmpty() || youtubeChannelId.isNotEmpty()) onConnect()
     }
 
-    // Keep track of whether we've already done the initial scroll for the current set of messages
-    var hasPerformedInitialScroll by remember(twitchChannel) { mutableStateOf(false) }
-
-    // Scroll to bottom when messages first appear or when switching back to this tab
-    LaunchedEffect(chatMessages.isNotEmpty()) {
-        if (chatMessages.isNotEmpty() && !hasPerformedInitialScroll) {
-            listState.scrollToItem(chatMessages.size - 1)
-            hasPerformedInitialScroll = true
+    // Snap to bottom when connection is established/restored
+    LaunchedEffect(chatConnected) {
+        if (chatConnected) {
+            forceScrollToBottom = true
         }
     }
 
     // Auto-scroll logic:
-    // We want to auto-scroll if the user is already at the bottom.
-    // We use a much larger threshold (10 items) to be extremely forgiving.
-    val isAtBottom by remember {
-        derivedStateOf {
+    // Trigger on ANY message update (even if size stays at 100)
+    LaunchedEffect(chatMessages) {
+        if (chatMessages.isNotEmpty()) {
             val layoutInfo = listState.layoutInfo
             val visibleItems = layoutInfo.visibleItemsInfo
-            if (visibleItems.isEmpty()) return@derivedStateOf true
             
-            val lastVisibleItem = visibleItems.last()
-            // If the last visible item is within 10 of the total count, we consider it "at bottom"
-            lastVisibleItem.index >= layoutInfo.totalItemsCount - 10
-        }
-    }
+            // Check if user is currently near the bottom of the list
+            val isAtBottom = if (visibleItems.isNotEmpty()) {
+                val lastVisibleIndex = visibleItems.last().index
+                val totalItems = layoutInfo.totalItemsCount
+                // Threshold of 25 messages to be very forgiving
+                lastVisibleIndex >= totalItems - 25 || (lastItemCount > 0 && lastVisibleIndex >= lastItemCount - 25)
+            } else {
+                // If it's the first time messages appear
+                true
+            }
 
-    // Use a SideEffect or a snapshotFlow to monitor message count and scroll
-    LaunchedEffect(chatMessages) {
-        if (chatMessages.isNotEmpty() && isAtBottom && !listState.isScrollInProgress) {
-            // scrollToItem is more reliable than animateScrollToItem for rapid updates
-            listState.scrollToItem(chatMessages.size - 1)
+            if ((isAtBottom || forceScrollToBottom) && !listState.isScrollInProgress) {
+                // scrollToItem is more reliable than animateScrollToItem for rapid updates
+                listState.scrollToItem(chatMessages.size - 1)
+                forceScrollToBottom = false
+            }
         }
+        lastItemCount = chatMessages.size
     }
 
     val context = LocalContext.current
@@ -208,6 +211,7 @@ fun ChatScreen(
                         lineSpacing = chatLineSpacing,
                         emoteSize = chatEmoteSize,
                         usernameSize = chatUsernameSize,
+                        showTimestamp = showTimestamp,
                         imageLoader = imageLoader
                     )
                 }
@@ -225,6 +229,7 @@ private fun ChatMessageRow(
     lineSpacing: Float,
     emoteSize: Float,
     usernameSize: Float,
+    showTimestamp: Boolean,
     imageLoader: ImageLoader
 ) {
     val badgeSize = (fontSize * 1.1f).sp
@@ -253,6 +258,14 @@ private fun ChatMessageRow(
 
     val segments: List<MessageSegment> = remember(message.id, thirdPartyEmotes.size) {
         parseMessageSegments(message.message, message.emotesTag, thirdPartyEmotes, message.youtubeEmotes)
+    }
+
+    val timestampText = remember(message.timestamp, showTimestamp) {
+        if (showTimestamp && message.timestamp != null) {
+            val date = java.util.Date(message.timestamp)
+            val sdf = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+            sdf.format(date) + " "
+        } else ""
     }
 
     val inlineContent: Map<String, InlineTextContent> = remember(
@@ -288,8 +301,14 @@ private fun ChatMessageRow(
         }
     }
 
-    val annotatedText = remember(message.id, thirdPartyEmotes.size, twitchBadges.size, nameColor, usernameSize) {
+    val annotatedText = remember(message.id, thirdPartyEmotes.size, twitchBadges.size, nameColor, usernameSize, timestampText) {
         buildAnnotatedString {
+            if (timestampText.isNotEmpty()) {
+                withStyle(SpanStyle(color = Color.LightGray.copy(alpha = 0.8f), fontSize = (fontSize * 0.8f).sp)) {
+                    append(timestampText)
+                }
+            }
+
             if (message.platform == "youtube" || message.platform == "twitch") {
                 appendInlineContent("platform_icon", "[${message.platform}]")
                 append(' ')

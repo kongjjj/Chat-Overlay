@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -48,25 +49,32 @@ class YouTubeChatClient {
         _messages.value = emptyList()
 
         job = scope.launch {
-            try {
-                // If it's a channel ID (starts with UC), resolve it to a live video ID
-                val videoId = if (channelId.startsWith("UC")) {
-                    resolveLiveVideoId(channelId)
-                } else {
-                    channelId // Fallback for direct video ID
-                }
+            while (isActive) {
+                try {
+                    // If it's a channel ID (starts with UC), resolve it to a live video ID
+                    val videoId = if (channelId.startsWith("UC")) {
+                        resolveLiveVideoId(channelId)
+                    } else {
+                        channelId // Fallback for direct video ID
+                    }
 
-                if (videoId != null && fetchInitialPage(videoId)) {
-                    currentVideoId = videoId
-                    _connected.value = true
-                    pollChat()
-                } else {
-                    Log.e(TAG, "Failed to resolve or fetch initial page for: $channelId")
+                    if (videoId != null && fetchInitialPage(videoId)) {
+                        currentVideoId = videoId
+                        _connected.value = true
+                        pollChat() // This loop runs until failure or cancellation
+                    } else {
+                        Log.e(TAG, "Failed to resolve or fetch initial page for: $channelId")
+                        _connected.value = false
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error connecting to YouTube chat", e)
                     _connected.value = false
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error connecting to YouTube chat", e)
-                _connected.value = false
+                
+                // If we reach here, something failed. Wait before retrying.
+                if (isActive) {
+                    delay(10000)
+                }
             }
         }
     }

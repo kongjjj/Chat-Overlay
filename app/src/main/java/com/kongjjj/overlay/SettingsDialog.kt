@@ -30,6 +30,7 @@ fun SettingsDialog(
     enableFfz: Boolean,
     backgroundColor: String,
     appLanguage: String,
+    showTimestamp: Boolean,
     ttsEnabled: Boolean,
     ttsLanguage: String,
     ttsIgnoreSender: Boolean,
@@ -44,6 +45,7 @@ fun SettingsDialog(
     onEnableBttvChange: (Boolean) -> Unit,
     onEnableFfzChange: (Boolean) -> Unit,
     onBackgroundColorChange: (String) -> Unit,
+    onShowTimestampChange: (Boolean) -> Unit,
     onTtsEnabledChange: (Boolean) -> Unit,
     onTtsLanguageChange: (String) -> Unit,
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
@@ -66,6 +68,7 @@ fun SettingsDialog(
                 enableFfz = enableFfz,
                 backgroundColor = backgroundColor,
                 appLanguage = appLanguage,
+                showTimestamp = showTimestamp,
                 ttsEnabled = ttsEnabled,
                 ttsLanguage = ttsLanguage,
                 ttsIgnoreSender = ttsIgnoreSender,
@@ -80,6 +83,7 @@ fun SettingsDialog(
                 onEnableBttvChange = onEnableBttvChange,
                 onEnableFfzChange = onEnableFfzChange,
                 onBackgroundColorChange = onBackgroundColorChange,
+                onShowTimestampChange = onShowTimestampChange,
                 onTtsEnabledChange = onTtsEnabledChange,
                 onTtsLanguageChange = onTtsLanguageChange,
                 onTtsIgnoreSenderChange = onTtsIgnoreSenderChange,
@@ -106,6 +110,7 @@ fun SettingsContent(
     enableFfz: Boolean,
     backgroundColor: String,
     appLanguage: String,
+    showTimestamp: Boolean,
     ttsEnabled: Boolean,
     ttsLanguage: String,
     ttsIgnoreSender: Boolean,
@@ -120,6 +125,7 @@ fun SettingsContent(
     onEnableBttvChange: (Boolean) -> Unit,
     onEnableFfzChange: (Boolean) -> Unit,
     onBackgroundColorChange: (String) -> Unit,
+    onShowTimestampChange: (Boolean) -> Unit,
     onTtsEnabledChange: (Boolean) -> Unit,
     onTtsLanguageChange: (String) -> Unit,
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
@@ -197,6 +203,14 @@ fun SettingsContent(
                     Text(getLabel("Black", appLanguage), modifier = Modifier.clickable { onBackgroundColorChange("black") })
                 }
             }
+        }
+
+        HorizontalDivider()
+
+        // Show Timestamp
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(getLabel("Show Timestamp", appLanguage), style = MaterialTheme.typography.bodyMedium)
+            Switch(checked = showTimestamp, onCheckedChange = onShowTimestampChange)
         }
 
         HorizontalDivider()
@@ -354,7 +368,8 @@ fun getLabel(key: String, lang: String): String {
         "Animated Emotes" to mapOf("zh-TW" to "動態表情符號", "en" to "Animated Emotes", "ja" to "アニメーションエモート"),
         "Show GIF as animated images" to mapOf("zh-TW" to "將 GIF 顯示為動態圖片", "en" to "Show GIF as animated images", "ja" to "GIFをアニメーション画像として表示"),
         "Emote Sources" to mapOf("zh-TW" to "表情符號來源", "en" to "Emote Sources", "ja" to "エモートソース"),
-        "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの言語")
+        "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの言語"),
+        "Show Timestamp" to mapOf("zh-TW" to "顯示留言時間", "en" to "Show Timestamp", "ja" to "タイムスタンプを表示")
     )
     return labels[key]?.get(lang) ?: key
 }

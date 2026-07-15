@@ -35,18 +35,20 @@ class TwitchChatClient {
 
     private var currentChannel: String? = null
     private var lastReceivedTimestamp: Long? = null
+    private var shouldBeConnected = false
     private val scope = CoroutineScope(Dispatchers.IO)
 
     fun connect(channel: String) {
         val normalizedChannel = channel.lowercase().trim()
         if (normalizedChannel == currentChannel && _connected.value) return
 
+        shouldBeConnected = true
         if (normalizedChannel != currentChannel) {
             _messages.value = emptyList()
             lastReceivedTimestamp = null
         }
         
-        disconnect()
+        disconnectInternal()
         currentChannel = normalizedChannel
         _roomId.value = ""
 
@@ -79,12 +81,27 @@ class TwitchChatClient {
 
             override fun onClosed(ws: WebSocket, code: Int, reason: String) {
                 _connected.value = false
+                if (shouldBeConnected) {
+                    reconnect()
+                }
             }
 
             override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
                 _connected.value = false
+                if (shouldBeConnected) {
+                    reconnect()
+                }
             }
         })
+    }
+
+    private fun reconnect() {
+        scope.launch {
+            kotlinx.coroutines.delay(5000)
+            currentChannel?.let { 
+                if (shouldBeConnected) connect(it) 
+            }
+        }
     }
 
     private fun handleLine(line: String) {
@@ -240,6 +257,11 @@ class TwitchChatClient {
     }
 
     fun disconnect() {
+        shouldBeConnected = false
+        disconnectInternal()
+    }
+
+    private fun disconnectInternal() {
         socket?.close(1000, null)
         socket = null
         _connected.value = false

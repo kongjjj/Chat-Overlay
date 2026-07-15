@@ -29,6 +29,7 @@ class ChatManager private constructor(context: Context) {
     val enableFfz = MutableStateFlow(true)
     val backgroundColor = MutableStateFlow("transparent") // "transparent" or "black"
     val appLanguage = MutableStateFlow("zh-TW") // "zh-TW", "en", "ja"
+    val showTimestamp = MutableStateFlow(false)
     
     // TTS Settings
     val ttsEnabled = MutableStateFlow(false)
@@ -52,6 +53,7 @@ class ChatManager private constructor(context: Context) {
         enableFfz.value = prefs.getBoolean("enable_ffz", true)
         backgroundColor.value = prefs.getString("background_color", "transparent") ?: "transparent"
         appLanguage.value = prefs.getString("app_language", "zh-TW") ?: "zh-TW"
+        showTimestamp.value = prefs.getBoolean("show_timestamp", false)
         
         ttsEnabled.value = prefs.getBoolean("tts_enabled", false)
         ttsIgnoreSender.value = prefs.getBoolean("tts_ignore_sender", false)
@@ -197,6 +199,11 @@ class ChatManager private constructor(context: Context) {
     fun saveAppLanguage(lang: String, context: Context) {
         appLanguage.value = lang
         context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putString("app_language", lang).apply()
+    }
+
+    fun saveShowTimestamp(show: Boolean, context: Context) {
+        showTimestamp.value = show
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putBoolean("show_timestamp", show).apply()
     }
 
     fun saveTtsEnabled(enabled: Boolean, context: Context) {

@@ -13,11 +13,12 @@ import android.os.IBinder
 import android.util.DisplayMetrics
 import android.view.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import com.kongjjj.overlay.ui.theme.ChatOverlayTheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -28,6 +29,10 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
@@ -52,6 +57,32 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private var savedHeight = 0
     private var isCollapsed = false
     private val showSettingsState = mutableStateOf(false)
+    private val uiVisible = mutableStateOf(true)
+    private var hideJob: Job? = null
+    private val serviceScope = MainScope()
+
+    private fun startHideTimer() {
+        hideJob?.cancel()
+        hideJob = serviceScope.launch {
+            delay(3000)
+            uiVisible.value = false
+            updateViewsVisibility()
+        }
+    }
+
+    private fun resetHideTimer() {
+        uiVisible.value = true
+        updateViewsVisibility()
+        startHideTimer()
+    }
+
+    private fun updateViewsVisibility() {
+        if (!::floatingView.isInitialized) return
+        val visible = uiVisible.value
+        floatingView.findViewById<View>(R.id.top_controls_container)?.visibility = if (visible) View.VISIBLE else View.GONE
+        floatingView.findViewById<View>(R.id.resize_handle)?.visibility = if (visible) View.VISIBLE else View.GONE
+        floatingView.findViewById<View>(R.id.drag_handle)?.visibility = if (visible) View.VISIBLE else View.GONE
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -128,6 +159,8 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
         windowManager.addView(floatingView, params)
 
+        startHideTimer()
+
         val composeView = ComposeView(this).apply {
             setBackgroundColor(0)
             setContent {
@@ -154,11 +187,21 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     val emoteSize by chatManager.chatEmoteSize.collectAsState()
                     val usernameSize by chatManager.chatUsernameSize.collectAsState()
                     val animated by chatManager.animatedEmotes.collectAsState()
+                    val showTimestamp by chatManager.showTimestamp.collectAsState()
                     val backgroundColor by chatManager.backgroundColor.collectAsState()
+                    val isVisible by uiVisible
                     
                     Box(modifier = Modifier
                         .fillMaxSize()
                         .background(if (backgroundColor == "black") Color.Black else Color.Transparent)
+                        .pointerInput(Unit) {
+                            detectTapGestures { offset ->
+                                val halfWidth = size.width / 2
+                                if (offset.x < halfWidth) {
+                                    resetHideTimer()
+                                }
+                            }
+                        }
                     ) {
                         ChatScreen(
                             twitchChannel = twitchChannel,
@@ -172,6 +215,8 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             chatEmoteSize = emoteSize,
                             chatUsernameSize = usernameSize,
                             animatedEmotes = animated,
+                            showTimestamp = showTimestamp,
+                            showChrome = isVisible,
                             onConnect = { chatManager.connect() }
                         )
                     }
@@ -195,6 +240,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         val resizeHandle = floatingView.findViewById<View>(R.id.resize_handle)
 
         floatingView.findViewById<View>(R.id.btn_restore).setOnClickListener {
+            resetHideTimer()
             val intent = Intent(this, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             }
@@ -203,6 +249,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
 
         floatingView.findViewById<View>(R.id.btn_collapse).setOnClickListener {
+            resetHideTimer()
             if (!isCollapsed) {
                 savedWidth = params.width
                 savedHeight = params.height
@@ -259,6 +306,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             if (isCollapsed) return@setOnTouchListener false
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    resetHideTimer()
                     initialX = params.x
                     initialY = params.y
                     initialTouchX = event.rawX
@@ -267,12 +315,14 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
+                    resetHideTimer()
                     params.x = initialX + (event.rawX - initialTouchX).toInt()
                     params.y = initialY + (event.rawY - initialTouchY).toInt()
                     windowManager.updateViewLayout(floatingView, params)
                     true
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    resetHideTimer()
                     border.visibility = View.GONE
                     true
                 }
@@ -284,6 +334,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             if (isCollapsed) return@setOnTouchListener false
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    resetHideTimer()
                     initialWidth = params.width
                     initialHeight = params.height
                     initialTouchX = event.rawX
@@ -292,6 +343,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
+                    resetHideTimer()
                     val deltaX = (event.rawX - initialTouchX).toInt()
                     val deltaY = (event.rawY - initialTouchY).toInt()
                     params.width = Math.max((100 * metrics.density).toInt(), initialWidth + deltaX)
@@ -300,6 +352,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     true
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    resetHideTimer()
                     border.visibility = View.GONE
                     true
                 }
