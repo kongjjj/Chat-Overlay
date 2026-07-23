@@ -39,7 +39,7 @@
                 android:layout_height="18dp"
                 android:src="@drawable/drag_handle_indicator"
                 android:alpha="1.0"
-                android:contentDescription="Drag" />
+                android:contentDescription="@string/desc_drag" />
         </LinearLayout>
 
         <!-- Top Controls -->
@@ -56,7 +56,7 @@
                 android:layout_height="25dp"
                 android:layout_gravity="top|start"
                 android:src="@drawable/ic_back"
-                android:contentDescription="Collapse"
+                android:contentDescription="@string/desc_collapse"
                 android:clickable="true"
                 android:focusable="true" />
 
@@ -67,7 +67,7 @@
                 android:layout_height="25dp"
                 android:layout_gravity="top|end"
                 android:src="@drawable/ic_close"
-                android:contentDescription="Restore"
+                android:contentDescription="@string/desc_restore"
                 android:clickable="true"
                 android:focusable="true" />
 
@@ -80,7 +80,7 @@
             android:layout_height="25dp"
             android:layout_gravity="bottom|end"
             android:src="@drawable/ic_resize"
-            android:contentDescription="Resize"
+            android:contentDescription="@string/desc_resize"
             android:clickable="true"
             android:focusable="true" />
     </FrameLayout>
@@ -97,6 +97,7 @@
         android:padding="10dp"
         android:visibility="gone"
         android:clickable="true"
-        android:focusable="true" />
+        android:focusable="true"
+        android:contentDescription="@string/desc_restore" />
 
 </FrameLayout>
