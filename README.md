@@ -33,6 +33,6 @@
 可以在手機上開啟 GitHub 發行頁面，下載 .apk 檔案並安裝。 
 
 ## 我製作的其他程式
-[Live Streaming Camera](https://github.com/kongjjj/Live-Streaming-Camera)：一個使用中文製作的Android直播程式 
+[Live Streaming Camera](https://github.com/kongjjj/Live-Streaming-Camera)：一個使用中文製作的Android直播程式。 
 
 
