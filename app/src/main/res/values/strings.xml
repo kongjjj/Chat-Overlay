@@ -18,4 +18,8 @@
     <string name="request_permission">請先允許懸浮窗權限</string>
     <string name="open_overlay">開啟OVERLAY</string>
     <string name="exit_app">結束程式</string>
+    <string name="desc_drag">拖曳</string>
+    <string name="desc_collapse">摺疊</string>
+    <string name="desc_restore">還原</string>
+    <string name="desc_resize">縮放</string>
 </resources>
