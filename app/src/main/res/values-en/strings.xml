@@ -17,4 +17,8 @@
     <string name="settings_title">Set the Overlay URL</string>
     <string name="permission_denied">Floating window permission denied, cannot be minimized.</string>
     <string name="request_permission">Please grant the floating window permission first.</string>
+    <string name="desc_drag">Drag</string>
+    <string name="desc_collapse">Collapse</string>
+    <string name="desc_restore">Restore</string>
+    <string name="desc_resize">Resize</string>
 </resources>
