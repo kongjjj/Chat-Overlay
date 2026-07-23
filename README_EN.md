@@ -25,7 +25,8 @@ Transparent Chat viewer app for IRL streaming
 - After UI Disappears.
 ![Chat-Overlay](pics/Screenshot_5.jpg)
 
-
+## Other project I have made
+- [Live Streaming Camera](https://github.com/kongjjj/Live-Streaming-Camera)：An Android live streaming app built using Chinese language. 
 
 
 
