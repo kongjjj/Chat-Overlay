@@ -29,15 +29,4 @@ class TtsManager(context: Context) : TextToSpeech.OnInitListener {
             tts?.speak(text, TextToSpeech.QUEUE_ADD, null, null)
         }
     }
-
-    fun stop() {
-        tts?.stop()
-    }
-
-    fun release() {
-        tts?.stop()
-        tts?.shutdown()
-        tts = null
-        isInitialized = false
-    }
 }

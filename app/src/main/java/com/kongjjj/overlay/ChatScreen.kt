@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.*
@@ -16,20 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.input.pointer.pointerInput
-import com.kongjjj.overlay.ui.theme.DarkText
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
@@ -238,7 +234,7 @@ private fun ChatMessageRow(
     val defaultColor = MaterialTheme.colorScheme.primary
     val nameColor: Color = remember(message.color, defaultColor) {
         if (message.color != null) {
-            try { Color(android.graphics.Color.parseColor(message.color)) }
+            try { Color(message.color.toColorInt()) }
             catch (_: Exception) { defaultColor }
         } else defaultColor
     }
@@ -349,9 +345,6 @@ private fun ChatMessageRow(
         }
     }
 
-    val uriHandler = LocalUriHandler.current
-    var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-
     Text(
         text = annotatedText,
         inlineContent = inlineContent,
@@ -368,7 +361,6 @@ private fun ChatMessageRow(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 2.dp),
-        onTextLayout = { layoutResult = it }
+            .padding(horizontal = 12.dp, vertical = 2.dp)
     )
 }

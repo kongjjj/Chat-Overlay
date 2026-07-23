@@ -18,8 +18,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.util.UUID
 
+import kotlin.time.Duration.Companion.seconds
+
 class YouTubeChatClient {
-    private val TAG = "YouTubeChatClient"
+    private val tag = "YouTubeChatClient"
     private val http = OkHttpClient()
     private val scope = CoroutineScope(Dispatchers.IO)
     private var job: Job? = null
@@ -30,11 +32,8 @@ class YouTubeChatClient {
     private val _newMessages = MutableSharedFlow<ChatMessage>()
     val newMessages: SharedFlow<ChatMessage> = _newMessages
 
-    private val _connected = MutableStateFlow(false)
+    private val _connected = MutableStateFlow(value = false)
     val connected: StateFlow<Boolean> = _connected
-
-    private val _viewerCount = MutableStateFlow<Int?>(null)
-    val viewerCount: StateFlow<Int?> = _viewerCount
 
     private var currentChannelId: String? = null
     private var currentVideoId: String? = null
@@ -58,28 +57,28 @@ class YouTubeChatClient {
                         channelId // Fallback for direct video ID
                     }
 
-                    if (videoId != null && fetchInitialPage(videoId)) {
+                    if ((videoId != null) && fetchInitialPage(videoId)) {
                         currentVideoId = videoId
                         _connected.value = true
                         pollChat() // This loop runs until failure or cancellation
                     } else {
-                        Log.e(TAG, "Failed to resolve or fetch initial page for: $channelId")
+                        Log.e(tag, "Failed to resolve or fetch initial page for: $channelId")
                         _connected.value = false
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error connecting to YouTube chat", e)
+                    Log.e(tag, "Error connecting to YouTube chat", e)
                     _connected.value = false
                 }
                 
                 // If we reach here, something failed. Wait before retrying.
                 if (isActive) {
-                    delay(10000)
+                    delay(10.seconds)
                 }
             }
         }
     }
 
-    private suspend fun resolveLiveVideoId(channelId: String): String? {
+    private fun resolveLiveVideoId(channelId: String): String? {
         val url = "https://www.youtube.com/channel/$channelId/live"
         val request = Request.Builder().url(url)
             .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
@@ -95,13 +94,13 @@ class YouTubeChatClient {
             
             if (videoId == null) {
                 // Try extracting from HTML if redirect didn't happen as expected
-                val html = response.body?.string() ?: ""
+                val html = response.body.string()
                 videoId = Regex("\"videoId\":\"([^\"]{11})\"").find(html)?.groupValues?.get(1)
             }
             
             videoId
         } catch (e: Exception) {
-            Log.e(TAG, "Error resolving live video ID", e)
+            Log.e(tag, "Error resolving live video ID", e)
             null
         }
     }
@@ -116,7 +115,15 @@ class YouTubeChatClient {
         continuation = null
     }
 
-    private suspend fun fetchInitialPage(videoId: String): Boolean {
+    fun clearMessages() {
+        _messages.value = emptyList()
+        currentChannelId = null
+        currentVideoId = null
+        apiKey = null
+        continuation = null
+    }
+
+    private fun fetchInitialPage(videoId: String): Boolean {
         val url = "https://www.youtube.com/live_chat?v=$videoId"
         val request = Request.Builder().url(url)
             .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
@@ -125,31 +132,31 @@ class YouTubeChatClient {
         return try {
             val response = http.newCall(request).execute()
             if (!response.isSuccessful) return false
-            val html = response.body?.string() ?: ""
+            val html = response.body.string()
 
             apiKey = Regex("\"INNERTUBE_API_KEY\":\"([^\"]+)\"").find(html)?.groupValues?.get(1)
             continuation = Regex("\"continuation\":\"([^\"]+)\"").find(html)?.groupValues?.get(1)
 
             apiKey != null && continuation != null
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching initial page", e)
+            Log.e(tag, "Error fetching initial page", e)
             false
         }
     }
 
     private suspend fun pollChat() {
-        while (job?.isActive == true && apiKey != null && continuation != null) {
+        while ((job?.isActive == true) && (apiKey != null) && (continuation != null)) {
             try {
-                // Also poll viewer count while we're at it
-                currentVideoId?.let { fetchViewerCount(it) }
-
                 val url = "https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=$apiKey"
                 val json = JSONObject().apply {
                     put("context", JSONObject().apply {
-                        put("client", JSONObject().apply {
-                            put("clientName", "WEB")
-                            put("clientVersion", "2.20210622.10.00")
-                        })
+                        put(
+                            "client",
+                            JSONObject().apply {
+                                put("clientName", "WEB")
+                                put("clientVersion", "2.20210622.10.00")
+                            },
+                        )
                     })
                     put("continuation", continuation)
                 }
@@ -162,7 +169,7 @@ class YouTubeChatClient {
 
                 val response = http.newCall(request).execute()
                 if (response.isSuccessful) {
-                    val body = response.body?.string() ?: ""
+                    val body = response.body.string()
                     val jsonObj = JSONObject(body)
                     
                     val continuationData = jsonObj.optJSONObject("continuationContents")?.optJSONObject("liveChatContinuation")
@@ -173,7 +180,7 @@ class YouTubeChatClient {
 
                     val actions = continuationData?.optJSONArray("actions")
                     if (actions != null) {
-                        val newMessages = mutableListOf<ChatMessage>()
+                        val newMessagesList = mutableListOf<ChatMessage>()
                         for (i in 0 until actions.length()) {
                             val action = actions.getJSONObject(i)
                             val item = action.optJSONObject("addChatItemAction")?.optJSONObject("item")
@@ -193,11 +200,11 @@ class YouTubeChatClient {
                                             if (customThumbnail != null) {
                                                 // Try to get a higher resolution thumbnail if possible, or just the first one
                                                 val thumbnails = customThumbnail.optJSONArray("thumbnails")
-                                                val url = thumbnails?.optJSONObject(thumbnails.length() - 1)?.optString("url")
+                                                val badgeUrl = thumbnails?.optJSONObject(thumbnails.length() - 1)?.optString("url")
                                                     ?: thumbnails?.optJSONObject(0)?.optString("url")
-                                                if (url != null) {
+                                                if (badgeUrl != null) {
                                                     // Ensure the URL is absolute
-                                                    val absoluteUrl = if (url.startsWith("//")) "https:$url" else url
+                                                    val absoluteUrl = if (badgeUrl.startsWith("//")) "https:$badgeUrl" else badgeUrl
                                                     badgeTags.add(absoluteUrl)
                                                 }
                                             } else {
@@ -225,9 +232,9 @@ class YouTubeChatClient {
                                             val shortcut = emoji?.optJSONArray("shortcuts")?.optString(0) ?: ":emoji:"
                                             messageText.append(shortcut)
                                             
-                                            val url = emoji?.optJSONObject("image")?.optJSONArray("thumbnails")?.optJSONObject(0)?.optString("url")
-                                            if (url != null) {
-                                                youtubeEmotes[shortcut] = url
+                                            val emoteUrl = emoji?.optJSONObject("image")?.optJSONArray("thumbnails")?.optJSONObject(0)?.optString("url")
+                                            if (emoteUrl != null) {
+                                                youtubeEmotes[shortcut] = emoteUrl
                                             }
                                         }
                                     }
@@ -235,21 +242,23 @@ class YouTubeChatClient {
 
                                 val timestampUsec = textItem.optString("timestampUsec").toLongOrNull() ?: 0L
                                 
-                                newMessages.add(ChatMessage(
-                                    id = UUID.randomUUID().toString(),
-                                    username = authorName,
-                                    message = messageText.toString(),
-                                    badgeTags = badgeTags,
-                                    youtubeEmotes = youtubeEmotes,
-                                    timestamp = timestampUsec / 1000,
-                                    platform = "youtube"
-                                ))
+                                newMessagesList.add(
+                                    ChatMessage(
+                                        id = UUID.randomUUID().toString(),
+                                        username = authorName,
+                                        message = messageText.toString(),
+                                        badgeTags = badgeTags,
+                                        youtubeEmotes = youtubeEmotes,
+                                        timestamp = timestampUsec / 1000,
+                                        platform = "youtube",
+                                    ),
+                                )
                             }
                         }
-                        if (newMessages.isNotEmpty()) {
+                        if (newMessagesList.isNotEmpty()) {
                             // Filter out messages we already have
                             val existingIds = _messages.value.map { it.id }.toSet()
-                            val uniqueNewMessages = newMessages.filter { it.id !in existingIds }
+                            val uniqueNewMessages = newMessagesList.filter { it.id !in existingIds }
                             
                             if (uniqueNewMessages.isNotEmpty()) {
                                 _messages.value = (_messages.value + uniqueNewMessages).takeLast(MAX_CHAT_MESSAGES)
@@ -259,39 +268,9 @@ class YouTubeChatClient {
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error polling chat", e)
+                Log.e(tag, "Error polling chat", e)
             }
-            delay(5000) // Poll every 5 seconds to avoid rate limiting
-        }
-    }
-
-    private suspend fun fetchViewerCount(videoId: String) {
-        if (apiKey == null) return
-        val url = "https://www.youtube.com/youtubei/v1/player?key=$apiKey"
-        val json = JSONObject().apply {
-            put("context", JSONObject().apply {
-                put("client", JSONObject().apply {
-                    put("clientName", "WEB")
-                    put("clientVersion", "2.20210622.10.00")
-                })
-            })
-            put("videoId", videoId)
-        }
-        val request = Request.Builder()
-            .url(url)
-            .post(json.toString().toRequestBody("application/json".toMediaTypeOrNull()))
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-            .build()
-        try {
-            val response = http.newCall(request).execute()
-            if (response.isSuccessful) {
-                val body = response.body?.string() ?: ""
-                val jsonObj = JSONObject(body)
-                val viewCount = jsonObj.optJSONObject("videoDetails")?.optString("viewCount")
-                _viewerCount.value = viewCount?.toIntOrNull()
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fetching viewer count", e)
+            delay(5.seconds) // Poll every 5 seconds to avoid rate limiting
         }
     }
 }

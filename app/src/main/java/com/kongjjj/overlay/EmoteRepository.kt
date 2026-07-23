@@ -1,6 +1,5 @@
 package com.kongjjj.overlay
 
-import android.util.Log
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
@@ -31,13 +30,9 @@ class EmoteRepository {
     private val _twitchBadges = MutableStateFlow<Map<String, String>>(emptyMap())
     val twitchBadges: StateFlow<Map<String, String>> = _twitchBadges
 
-    private val _loadReport = MutableStateFlow("loading…")
-    val loadReport: StateFlow<String> = _loadReport
-
     /**
      * Loads emote providers and global badges sequentially on the IO dispatcher.
      * Clears existing third-party emotes first so toggling a provider off takes effect.
-     * loadReport is updated with per-source counts, "off", or exception class names.
      */
     suspend fun loadAll(
         enable7tv: Boolean = true,
@@ -46,49 +41,18 @@ class EmoteRepository {
     ) = withContext(Dispatchers.IO) {
         _thirdPartyEmotes.value = emptyMap()
 
-        fun loadProvider(enabled: Boolean, fetch: () -> Map<String, String>): String {
-            if (!enabled) return "off"
-            return runCatching { fetch() }
+        fun loadProvider(enabled: Boolean, fetch: () -> Map<String, String>) {
+            if (!enabled) return
+            runCatching { fetch() }
                 .onSuccess { map -> _thirdPartyEmotes.update { current -> current + map } }
-                .fold({ it.size.toString() }, { it.javaClass.simpleName })
         }
 
-        val s7tv  = loadProvider(enable7tv,  ::fetch7TV)
-        val sBttv = loadProvider(enableBttv, ::fetchBTTV)
-        val sFfz  = loadProvider(enableFfz,  ::fetchFFZ)
+        loadProvider(enable7tv,  ::fetch7TV)
+        loadProvider(enableBttv, ::fetchBTTV)
+        loadProvider(enableFfz,  ::fetchFFZ)
 
-        val sBdg = runCatching { fetchTwitchBadges() }
+        runCatching { fetchTwitchBadges() }
             .onSuccess { badges -> _twitchBadges.value = badges }
-            .fold({ it.size.toString() }, { it.javaClass.simpleName })
-
-        _loadReport.value = "7tv:$s7tv bttv:$sBttv ffz:$sFfz bdg:$sBdg"
-    }
-
-    /**
-     * Fetches channel-specific emotes for a joined channel and merges them into
-     * the existing third-party emote map (does NOT clear globals first).
-     * Requires the Twitch numeric room-id (from ROOMSTATE) and the channel login name.
-     */
-    suspend fun loadChannelEmotes(
-        channelId: String,
-        channelName: String,
-        enable7tv: Boolean = true,
-        enableBttv: Boolean = true,
-        enableFfz: Boolean = true
-    ) = withContext(Dispatchers.IO) {
-        fun mergeProvider(enabled: Boolean, fetch: () -> Map<String, String>): String {
-            if (!enabled) return "off"
-            return runCatching { fetch() }
-                .onSuccess { map -> _thirdPartyEmotes.update { current -> current + map } }
-                .fold({ it.size.toString() }, { it.javaClass.simpleName })
-        }
-
-        val s7tv  = mergeProvider(enable7tv)  { fetch7TVChannel(channelId) }
-        val sBttv = mergeProvider(enableBttv) { fetchBTTVChannel(channelId) }
-        val sFfz  = mergeProvider(enableFfz)  { fetchFFZChannel(channelName) }
-
-        val prev = _loadReport.value.substringBefore(" | ch:")
-        _loadReport.value = "$prev | ch: 7tv:$s7tv bttv:$sBttv ffz:$sFfz"
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -96,7 +60,7 @@ class EmoteRepository {
     private fun get(url: String): String? = try {
         val req = Request.Builder().url(url).build()
         http.newCall(req).execute().use { resp ->
-            if (resp.isSuccessful) resp.body?.string() else null
+            if (resp.isSuccessful) resp.body.string() else null
         }
     } catch (_: Exception) { null }
 
@@ -107,6 +71,24 @@ class EmoteRepository {
             ?: return emptyMap()
         val arr  = root.getAsJsonArray("emotes") ?: return emptyMap()
         return parse7tvEmoteArray(arr)
+    }
+
+    private fun parse7tvEmoteArray(arr: JsonArray): Map<String, String> {
+        val map = mutableMapOf<String, String>()
+        arr.forEach { el ->
+            runCatching {
+                val obj     = el.asJsonObject
+                val name    = obj.get("name").asString
+                val data    = obj.getAsJsonObject("data")
+                val hostObj = data.getAsJsonObject("host")
+                val hostUrl = hostObj.get("url").asString
+                val files   = hostObj.getAsJsonArray("files")
+                val hasGif  = files?.any { it.asJsonObject.get("name")?.asString == "1x.gif" } == true
+                val ext     = if (hasGif) "1x.gif" else "1x.webp"
+                map[name]   = "https:$hostUrl/$ext"
+            }
+        }
+        return map
     }
 
     // ── BetterTTV global emotes ───────────────────────────────────────────────
@@ -129,76 +111,6 @@ class EmoteRepository {
     // ── FrankerFaceZ global emotes ────────────────────────────────────────────
     private fun fetchFFZ(): Map<String, String> {
         val body = get("https://api.frankerfacez.com/v1/set/global") ?: return emptyMap()
-        val root = JsonParser.parseString(body).takeIf { it.isJsonObject }?.asJsonObject
-            ?: return emptyMap()
-        val sets = root.getAsJsonObject("sets") ?: return emptyMap()
-        val map  = mutableMapOf<String, String>()
-        sets.entrySet().forEach { (_, setEl) ->
-            runCatching {
-                val emoticons = setEl.asJsonObject.getAsJsonArray("emoticons") ?: return@runCatching
-                emoticons.forEach { emEl ->
-                    runCatching {
-                        val emObj = emEl.asJsonObject
-                        val name  = emObj.get("name").asString
-                        val url1  = emObj.getAsJsonObject("urls").get("1")?.asString
-                            ?: return@runCatching
-                        map[name] = "https:$url1"
-                    }
-                }
-            }
-        }
-        return map
-    }
-
-    // ── 7TV channel emotes ────────────────────────────────────────────────────
-    private fun fetch7TVChannel(channelId: String): Map<String, String> {
-        val body = get("https://7tv.io/v3/users/twitch/$channelId") ?: return emptyMap()
-        val root = JsonParser.parseString(body).takeIf { it.isJsonObject }?.asJsonObject
-            ?: return emptyMap()
-        val arr  = root.getAsJsonObject("emote_set")?.getAsJsonArray("emotes") ?: return emptyMap()
-        return parse7tvEmoteArray(arr)
-    }
-
-    private fun parse7tvEmoteArray(arr: JsonArray): Map<String, String> {
-        val map = mutableMapOf<String, String>()
-        arr.forEach { el ->
-            runCatching {
-                val obj     = el.asJsonObject
-                val name    = obj.get("name").asString
-                val data    = obj.getAsJsonObject("data")
-                val hostObj = data.getAsJsonObject("host")
-                val hostUrl = hostObj.get("url").asString
-                val files   = hostObj.getAsJsonArray("files")
-                val hasGif  = files?.any { it.asJsonObject.get("name")?.asString == "1x.gif" } == true
-                val ext     = if (hasGif) "1x.gif" else "1x.webp"
-                map[name]   = "https:$hostUrl/$ext"
-            }
-        }
-        return map
-    }
-
-    // ── BTTV channel emotes ───────────────────────────────────────────────────
-    private fun fetchBTTVChannel(channelId: String): Map<String, String> {
-        val body = get("https://api.betterttv.net/3/cached/users/twitch/$channelId") ?: return emptyMap()
-        val root = JsonParser.parseString(body).takeIf { it.isJsonObject }?.asJsonObject
-            ?: return emptyMap()
-        val map  = mutableMapOf<String, String>()
-        listOf("channelEmotes", "sharedEmotes").forEach { key ->
-            root.getAsJsonArray(key)?.forEach { el ->
-                runCatching {
-                    val obj  = el.asJsonObject
-                    val id   = obj.get("id").asString
-                    val code = obj.get("code").asString
-                    map[code] = "https://cdn.betterttv.net/emote/$id/1x"
-                }
-            }
-        }
-        return map
-    }
-
-    // ── FFZ channel emotes ────────────────────────────────────────────────────
-    private fun fetchFFZChannel(channelName: String): Map<String, String> {
-        val body = get("https://api.frankerfacez.com/v1/room/$channelName") ?: return emptyMap()
         val root = JsonParser.parseString(body).takeIf { it.isJsonObject }?.asJsonObject
             ?: return emptyMap()
         val sets = root.getAsJsonObject("sets") ?: return emptyMap()
@@ -264,8 +176,6 @@ fun parseMessageSegments(
     youtubeEmotes:    Map<String, String> = emptyMap()
 ): List<MessageSegment> {
     
-    val allEmotes = thirdPartyEmotes + youtubeEmotes
-
     val twitchRanges = mutableListOf<Triple<Int, Int, String>>()
     emotesTag?.split("/")?.forEach { entry ->
         if (entry.isBlank()) return@forEach
@@ -353,7 +263,7 @@ private fun scanWords(text: String, emotes: Map<String, String>, useStrictBounda
 }
 
 private val urlRegex = Regex(
-    "((?:https?://|www\\.)[\\w\\d.\\-?&#=+%!:/~]+|(?:^|[\\s])(?:[\\w\\d\\-]+\\.)+(?:com|tv|net|org|io|me|gov|edu|tw|hk|jp|live)(?:/[\\w\\d.\\-?&#=+%!:/~]*)?)",
+    "((?:https?://|www\\.)[\\w.\\-?&#=+%!:/~]+|(?:^|\\s)(?:[\\w\\-]+\\.)+(?:com|tv|net|org|io|me|gov|edu|tw|hk|jp|live)(?:/[\\w.\\-?&#=+%!:/~]*)?)",
     RegexOption.IGNORE_CASE
 )
 

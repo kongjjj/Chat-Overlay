@@ -1,8 +1,6 @@
 package com.kongjjj.overlay
 
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -10,29 +8,27 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import com.kongjjj.overlay.ui.theme.ChatOverlayTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
+import com.kongjjj.overlay.ui.theme.ChatOverlayTheme
 
 class MainActivity : ComponentActivity() {
 
     private val overlayPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
+        ActivityResultContracts.StartActivityForResult(),
     ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (Settings.canDrawOverlays(this)) {
-                startOverlayService()
-            } else {
-                Toast.makeText(this, "需要懸浮窗權限", Toast.LENGTH_SHORT).show()
-            }
+        if (Settings.canDrawOverlays(this)) {
+            startOverlayService()
+        } else {
+            Toast.makeText(this, "需要懸浮窗權限", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -41,8 +37,8 @@ class MainActivity : ComponentActivity() {
         
         setContent {
             ChatOverlayTheme {
-                var showSettings by remember { mutableStateOf(false) }
-                var showLanguageDialog by remember { mutableStateOf(false) }
+                var showSettings by remember { mutableStateOf(value = false) }
+                var showLanguageDialog by remember { mutableStateOf(value = false) }
                 val chatManager = remember { ChatManager.getInstance(applicationContext) }
                 
                 val twitchChannel by chatManager.twitchChannel.collectAsState()
@@ -104,7 +100,10 @@ class MainActivity : ComponentActivity() {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         OutlinedButton(
-                            onClick = { finishAffinity() },
+                            onClick = { 
+                                chatManager.clearChatCache(this@MainActivity)
+                                finishAffinity() 
+                            },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(getLabel("Exit App", appLanguage))
@@ -156,8 +155,9 @@ class MainActivity : ComponentActivity() {
                             onTtsEnabledChange = { chatManager.saveTtsEnabled(it, this@MainActivity) },
                             onTtsLanguageChange = { chatManager.saveTtsLanguage(it, this@MainActivity) },
                             onTtsIgnoreSenderChange = { chatManager.saveTtsIgnoreSender(it, this@MainActivity) },
-                            onDismiss = { showSettings = false }
-                        )
+                        ) {
+                            showSettings = false
+                        }
                     }
                 }
             }
@@ -166,15 +166,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun checkPermissionAndStart() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:$packageName")
-                )
-                overlayPermissionLauncher.launch(intent)
-                return
-            }
+        if (!Settings.canDrawOverlays(this)) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                "package:$packageName".toUri(),
+            )
+            overlayPermissionLauncher.launch(intent)
+            return
         }
         startOverlayService()
     }
@@ -195,8 +193,8 @@ class MainActivity : ComponentActivity() {
             "Open Floating Chat" to mapOf("zh-TW" to "開啟懸浮聊天室", "en" to "Open Floating Chat", "ja" to "フローティングチャットを開く"),
             "Settings" to mapOf("zh-TW" to "設定", "en" to "Settings", "ja" to "設定"),
             "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの言語"),
-            "Exit App" to mapOf("zh-TW" to "關閉程式", "en" to "Close App", "ja" to "アプリを終了"),
-            "Close" to mapOf("zh-TW" to "關閉", "en" to "Close", "ja" to "閉じる")
+            "Exit App" to mapOf("zh-TW" to "關閉程式", "en" to "Exit App", "ja" to "終了"),
+            "Close" to mapOf("zh-TW" to "關閉", "en" to "Close", "ja" to "閉じる"),
         )
         return labels[key]?.get(lang) ?: key
     }

@@ -3,6 +3,7 @@ package com.kongjjj.overlay
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -15,9 +16,10 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.json.JSONObject
+import kotlin.time.Duration.Companion.seconds
 
 class TwitchChatClient {
-    private val TAG = "TwitchChatClient"
+    private val tag = "TwitchChatClient"
     private val http = OkHttpClient()
     private var socket: WebSocket? = null
 
@@ -27,11 +29,8 @@ class TwitchChatClient {
     private val _newMessages = MutableSharedFlow<ChatMessage>()
     val newMessages: SharedFlow<ChatMessage> = _newMessages
 
-    private val _connected = MutableStateFlow(false)
+    private val _connected = MutableStateFlow(value = false)
     val connected: StateFlow<Boolean> = _connected
-
-    private val _roomId = MutableStateFlow("")
-    val roomId: StateFlow<String> = _roomId
 
     private var currentChannel: String? = null
     private var lastReceivedTimestamp: Long? = null
@@ -50,54 +49,56 @@ class TwitchChatClient {
         
         disconnectInternal()
         currentChannel = normalizedChannel
-        _roomId.value = ""
 
         val nick = "justinfan${(10000..99999).random()}"
         val req = Request.Builder().url("wss://irc-ws.chat.twitch.tv:443").build()
 
-        socket = http.newWebSocket(req, object : WebSocketListener() {
-            override fun onOpen(ws: WebSocket, response: Response) {
-                ws.send("CAP REQ :twitch.tv/tags twitch.tv/commands")
-                ws.send("NICK $nick")
-                ws.send("JOIN #$normalizedChannel")
-                _connected.value = true
-                
-                // Fetch recent messages after connected
-                scope.launch {
-                    val recent = fetchRecentMessages(normalizedChannel)
-                    if (recent.isNotEmpty()) {
-                        // Merge with any real-time messages that arrived while fetching history
-                        val current = _messages.value
-                        val existingIds = current.map { it.id }.toSet()
-                        val filteredRecent = recent.filter { it.id !in existingIds }
-                        _messages.value = (filteredRecent + current).takeLast(MAX_CHAT_MESSAGES)
+        socket = http.newWebSocket(
+            req,
+            object : WebSocketListener() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    webSocket.send("CAP REQ :twitch.tv/tags twitch.tv/commands")
+                    webSocket.send("NICK $nick")
+                    webSocket.send("JOIN #$normalizedChannel")
+                    _connected.value = true
+                    
+                    // Fetch recent messages after connected
+                    scope.launch {
+                        val recent = fetchRecentMessages(normalizedChannel)
+                        if (recent.isNotEmpty()) {
+                            // Merge with any real-time messages that arrived while fetching history
+                            val current = _messages.value
+                            val existingIds = current.map { it.id }.toSet()
+                            val filteredRecent = recent.filter { it.id !in existingIds }
+                            _messages.value = (filteredRecent + current).takeLast(MAX_CHAT_MESSAGES)
+                        }
                     }
                 }
-            }
 
-            override fun onMessage(ws: WebSocket, text: String) {
-                text.lines().forEach { handleLine(it.trim()) }
-            }
-
-            override fun onClosed(ws: WebSocket, code: Int, reason: String) {
-                _connected.value = false
-                if (shouldBeConnected) {
-                    reconnect()
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    text.lines().forEach { handleLine(it.trim()) }
                 }
-            }
 
-            override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
-                _connected.value = false
-                if (shouldBeConnected) {
-                    reconnect()
+                override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                    _connected.value = false
+                    if (shouldBeConnected) {
+                        reconnect()
+                    }
                 }
-            }
-        })
+
+                override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                    _connected.value = false
+                    if (shouldBeConnected) {
+                        reconnect()
+                    }
+                }
+            },
+        )
     }
 
     private fun reconnect() {
         scope.launch {
-            kotlinx.coroutines.delay(5000)
+            delay(5.seconds)
             currentChannel?.let { 
                 if (shouldBeConnected) connect(it) 
             }
@@ -113,23 +114,6 @@ class TwitchChatClient {
             return
         }
 
-        // Extract the channel's Twitch user ID from ROOMSTATE
-        if (line.contains("ROOMSTATE")) {
-            if (line.startsWith("@")) {
-                val spaceIdx = line.indexOf(' ')
-                if (spaceIdx > 0) {
-                    line.substring(1, spaceIdx).split(";").forEach { tag ->
-                        val eqIdx = tag.indexOf('=')
-                        if (eqIdx >= 0 && tag.substring(0, eqIdx) == "room-id") {
-                            val id = tag.substring(eqIdx + 1)
-                            if (id.toLongOrNull() != null) _roomId.value = id
-                        }
-                    }
-                }
-            }
-            return
-        }
-
         if (!line.contains("PRIVMSG")) return
 
         val msg = parseTwitchIrcLine(line)
@@ -137,7 +121,8 @@ class TwitchChatClient {
             _messages.value = (_messages.value + msg).takeLast(MAX_CHAT_MESSAGES)
             scope.launch { _newMessages.emit(msg) }
             msg.timestamp?.let { ts ->
-                if (lastReceivedTimestamp == null || ts > lastReceivedTimestamp!!) {
+                val lastTs = lastReceivedTimestamp
+                if (lastTs == null || ts > lastTs) {
                     lastReceivedTimestamp = ts
                 }
             }
@@ -199,7 +184,7 @@ class TwitchChatClient {
                 emotesTag  = emotesTag,
                 badgeTags  = badges,
                 timestamp  = serverTimestamp,
-                platform   = "twitch"
+                platform   = "twitch",
             )
         } catch (_: Exception) {
             return null
@@ -215,10 +200,10 @@ class TwitchChatClient {
         try {
             val response = http.newCall(request).execute()
             if (!response.isSuccessful) {
-                Log.e(TAG, "Recent messages API 請求失敗: ${response.code}")
+                Log.e(tag, "Recent messages API 請求失敗: ${response.code}")
                 return@withContext emptyList()
             }
-            val jsonStr = response.body?.string() ?: ""
+            val jsonStr = response.body.string()
             if (jsonStr.isBlank()) return@withContext emptyList()
 
             val json = JSONObject(jsonStr)
@@ -234,18 +219,19 @@ class TwitchChatClient {
                 if (msg != null) {
                     recentList.add(msg)
                     msg.timestamp?.let { ts ->
-                        if (maxTimestamp == null || ts > maxTimestamp!!) {
+                        val currentMax = maxTimestamp
+                        if (currentMax == null || ts > currentMax) {
                             maxTimestamp = ts
                         }
                     }
                 }
             }
-            if (maxTimestamp != null && maxTimestamp != lastReceivedTimestamp) {
+            if ((maxTimestamp != null) && (maxTimestamp != lastReceivedTimestamp)) {
                 lastReceivedTimestamp = maxTimestamp
             }
             recentList
         } catch (e: Exception) {
-            Log.e(TAG, "獲取最近訊息失敗", e)
+            Log.e(tag, "獲取最近訊息失敗", e)
             emptyList()
         }
     }
@@ -265,6 +251,5 @@ class TwitchChatClient {
         socket?.close(1000, null)
         socket = null
         _connected.value = false
-        _roomId.value = ""
     }
 }

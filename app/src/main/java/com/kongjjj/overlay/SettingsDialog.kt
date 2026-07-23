@@ -50,7 +50,7 @@ fun SettingsDialog(
     onTtsEnabledChange: (Boolean) -> Unit,
     onTtsLanguageChange: (String) -> Unit,
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -88,7 +88,6 @@ fun SettingsDialog(
                 onTtsEnabledChange = onTtsEnabledChange,
                 onTtsLanguageChange = onTtsLanguageChange,
                 onTtsIgnoreSenderChange = onTtsIgnoreSenderChange,
-                onDismiss = onDismiss
             )
         },
         confirmButton = {
@@ -130,7 +129,6 @@ fun SettingsContent(
     onTtsEnabledChange: (Boolean) -> Unit,
     onTtsLanguageChange: (String) -> Unit,
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
-    onDismiss: () -> Unit
 ) {
     var channelInput by remember(twitchChannel) { mutableStateOf(twitchChannel) }
     var youtubeInput by remember(youtubeChannelId) { mutableStateOf(youtubeChannelId) }
@@ -151,11 +149,13 @@ fun SettingsContent(
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = {
-                        val trimmed = channelInput.trim().lowercase()
-                        onSaveChannel(trimmed)
-                        keyboardController?.hide()
-                    })
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            val trimmed = channelInput.trim().lowercase()
+                            onSaveChannel(trimmed)
+                            keyboardController?.hide()
+                        },
+                    )
                 )
                 FilledTonalButton(
                     onClick = {
@@ -178,11 +178,13 @@ fun SettingsContent(
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = {
-                        val trimmed = youtubeInput.trim()
-                        onSaveYoutubeChannelId(trimmed)
-                        keyboardController?.hide()
-                    })
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            val trimmed = youtubeInput.trim()
+                            onSaveYoutubeChannelId(trimmed)
+                            keyboardController?.hide()
+                        },
+                    )
                 )
                 FilledTonalButton(
                     onClick = {
@@ -234,7 +236,7 @@ fun SettingsContent(
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(getLabel("TTS Language", appLanguage), style = MaterialTheme.typography.bodyMedium)
                     
-                    var expanded by remember { mutableStateOf(false) }
+                    var expanded by remember { mutableStateOf(value = false) }
                     val languages = listOf(
                         "zh-HK" to "廣東話 (香港)",
                         "zh-TW" to "國語 (台灣)",
@@ -374,8 +376,8 @@ fun getLabel(key: String, lang: String): String {
         "Animated Emotes" to mapOf("zh-TW" to "動態表情符號", "en" to "Animated Emotes", "ja" to "アニメーションエモート"),
         "Show GIF as animated images" to mapOf("zh-TW" to "將 GIF 顯示為動態圖片", "en" to "Show GIF as animated images", "ja" to "GIFをアニメーション画像として表示"),
         "Emote Sources" to mapOf("zh-TW" to "表情符號來源", "en" to "Emote Sources", "ja" to "エモートソース"),
-        "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの言語"),
-        "Show Timestamp" to mapOf("zh-TW" to "顯示留言時間", "en" to "Show Timestamp", "ja" to "タイムスタンプを表示")
+        "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの語言"),
+        "Show Timestamp" to mapOf("zh-TW" to "顯示留言時間", "en" to "Show Timestamp", "ja" to "タイムスタンプを表示"),
     )
     return labels[key]?.get(lang) ?: key
 }

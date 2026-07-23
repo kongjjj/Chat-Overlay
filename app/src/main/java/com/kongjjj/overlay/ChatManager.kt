@@ -1,10 +1,10 @@
 package com.kongjjj.overlay
 
 import android.content.Context
+import androidx.core.content.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -105,12 +105,12 @@ class ChatManager private constructor(context: Context) {
 
     private fun updateTtsLanguage(langCode: String) {
         val locale = when (langCode) {
-            "zh-HK" -> Locale("zh", "HK") // Cantonese
+            "zh-HK" -> Locale.forLanguageTag("zh-HK") // Cantonese
             "zh-TW" -> Locale.TAIWAN     // Mandarin (TW)
             "zh-CN" -> Locale.CHINA      // Mandarin (CN)
             "en-US" -> Locale.US         // English
             "ja-JP" -> Locale.JAPAN      // Japanese
-            else -> Locale("zh", "HK")
+            else -> Locale.forLanguageTag("zh-HK")
         }
         ttsManager.setLanguage(locale)
     }
@@ -130,7 +130,7 @@ class ChatManager private constructor(context: Context) {
 
     fun saveTwitchChannel(channel: String, context: Context) {
         twitchChannel.value = channel
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putString("twitch_channel", channel).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putString("twitch_channel", channel) }
         if (channel.isNotEmpty()) {
             twitchClient.connect(channel)
         } else {
@@ -140,7 +140,7 @@ class ChatManager private constructor(context: Context) {
 
     fun saveYoutubeChannelId(channelId: String, context: Context) {
         youtubeChannelId.value = channelId
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putString("youtube_channel_id", channelId).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putString("youtube_channel_id", channelId) }
         if (channelId.isNotEmpty()) {
             youtubeClient.connect(channelId)
         } else {
@@ -150,80 +150,90 @@ class ChatManager private constructor(context: Context) {
 
     fun saveFontSize(size: Float, context: Context) {
         chatFontSize.value = size
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putFloat("chat_font_size", size).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putFloat("chat_font_size", size) }
     }
 
     fun saveLineSpacing(spacing: Float, context: Context) {
         chatLineSpacing.value = spacing
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putFloat("chat_line_spacing", spacing).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putFloat("chat_line_spacing", spacing) }
     }
 
     fun saveEmoteSize(size: Float, context: Context) {
         chatEmoteSize.value = size
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putFloat("chat_emote_size", size).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putFloat("chat_emote_size", size) }
     }
 
     fun saveUsernameSize(size: Float, context: Context) {
         chatUsernameSize.value = size
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putFloat("chat_username_size", size).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putFloat("chat_username_size", size) }
     }
 
     fun saveAnimatedEmotes(enabled: Boolean, context: Context) {
         animatedEmotes.value = enabled
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putBoolean("animated_emotes", enabled).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("animated_emotes", enabled) }
     }
 
     fun saveEnable7tv(enabled: Boolean, context: Context) {
         enable7tv.value = enabled
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putBoolean("enable_7tv", enabled).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("enable_7tv", enabled) }
         scope.launch { reloadEmotes() }
     }
 
     fun saveEnableBttv(enabled: Boolean, context: Context) {
         enableBttv.value = enabled
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putBoolean("enable_bttv", enabled).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("enable_bttv", enabled) }
         scope.launch { reloadEmotes() }
     }
 
     fun saveEnableFfz(enabled: Boolean, context: Context) {
         enableFfz.value = enabled
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putBoolean("enable_ffz", enabled).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("enable_ffz", enabled) }
         scope.launch { reloadEmotes() }
     }
 
     fun saveBackgroundColor(color: String, context: Context) {
         backgroundColor.value = color
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putString("background_color", color).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putString("background_color", color) }
     }
 
     fun saveAppLanguage(lang: String, context: Context) {
         appLanguage.value = lang
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putString("app_language", lang).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putString("app_language", lang) }
     }
 
     fun saveShowTimestamp(show: Boolean, context: Context) {
         showTimestamp.value = show
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putBoolean("show_timestamp", show).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("show_timestamp", show) }
     }
 
     fun saveTtsEnabled(enabled: Boolean, context: Context) {
         ttsEnabled.value = enabled
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putBoolean("tts_enabled", enabled).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("tts_enabled", enabled) }
     }
 
     fun saveTtsLanguage(langCode: String, context: Context) {
         ttsLanguage.value = langCode
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putString("tts_language", langCode).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putString("tts_language", langCode) }
         updateTtsLanguage(langCode)
     }
 
     fun saveTtsIgnoreSender(ignore: Boolean, context: Context) {
         ttsIgnoreSender.value = ignore
-        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit().putBoolean("tts_ignore_sender", ignore).apply()
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("tts_ignore_sender", ignore) }
     }
     
     private suspend fun reloadEmotes() {
         emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value)
+    }
+
+    @OptIn(coil.annotation.ExperimentalCoilApi::class)
+    fun clearChatCache(context: Context) {
+        twitchClient.clearMessages()
+        youtubeClient.clearMessages()
+        // Clear Coil cache
+        val imageLoader = coil.Coil.imageLoader(context)
+        imageLoader.diskCache?.clear()
+        imageLoader.memoryCache?.clear()
     }
 
     companion object {
