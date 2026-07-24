@@ -12,7 +12,7 @@
 </div>
 
 ## [English](README_EN.md)
-<br><br>
+<br>
 ## 功能
 
 - ✔️ Twitch、Youtube聊天室顯示。
