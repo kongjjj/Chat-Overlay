@@ -11,7 +11,7 @@
 [![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/kongjjj/Chat-Overlay)
 </div>
 
-## [English](README_EN.md)
+## [English here](README_EN.md)
 <br>
 ## 功能
 
