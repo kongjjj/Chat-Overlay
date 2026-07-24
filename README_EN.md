@@ -14,7 +14,6 @@ Transparent Chat viewer app for IRL streaming.
 
 ## [Traditional Chinese](README.md)
 <br>
-
 ## Features
 
 - ✔️ Display in Twitch and YouTube chatrooms.
