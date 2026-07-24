@@ -3,7 +3,7 @@
 <img src="pics/Logo.png" width="108" height="108" alt="Chat Overlay">
 
 <h1>Chat Overlay</h1>
-## [English](README_EN.md)
+[English](README_EN.md)
 一個透明聊天室viewer overlay，給直播使用。
 一個使用 [StreamPack boilerplate](https://github.com/ThibaultBee/StreamPack-boilerplate) 作底層製作的中文 Android/Twitch 直播程式。
 <br><br>
