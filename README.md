@@ -4,7 +4,7 @@
 
 <h1>Chat Overlay</h1>
 
-一個透明聊天室viewer overlay，給直播使用。
+一個Android透明 Youtube/Twitch聊天室overlay給直播使用。
 <br><br>
 [![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)](https://twitch.tv)
 [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
