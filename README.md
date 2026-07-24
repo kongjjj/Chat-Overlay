@@ -1,8 +1,16 @@
-# ![Chat-Overlay](pics/Logo.png) Chat-Overlay   
+
+<div align="center">
+<img src="pics/Logo.png" width="108" height="108" alt="Chat Overlay">
+
+<h1>Chat Overlay</h1>
 ## [English](README_EN.md)
-
 一個透明聊天室viewer overlay，給直播使用。
-
+一個使用 [StreamPack boilerplate](https://github.com/ThibaultBee/StreamPack-boilerplate) 作底層製作的中文 Android/Twitch 直播程式。
+<br><br>
+[![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)](https://twitch.tv)
+[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
+[![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)]([https://github.com/kongjjj/Live-Streaming-Camera](https://github.com/kongjjj/Chat-Overlay))
+</div>
 
 ## 功能
 
