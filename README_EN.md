@@ -4,7 +4,7 @@
 
 <h1>Chat Overlay</h1>
 
-Transparent Chat viewer app for IRL streaming.
+Android Transparent Youtube/Twitch Chat viewer app for IRL streaming.
 <br><br>
 [![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)](https://twitch.tv)
 [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
