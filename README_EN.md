@@ -1,8 +1,19 @@
-# ![Chat-Overlay](pics/Logo.png) Chat-Overlay   
+
+<div align="center">
+<img src="pics/Logo.png" width="108" height="108" alt="Chat Overlay">
+
+<h1>Chat Overlay</h1>
+
+Transparent Chat viewer app for IRL streaming.
+<br><br>
+[![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)](https://twitch.tv)
+[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
+[![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/kongjjj/Chat-Overlay)
+</div>
+
+
 ## [Traditional Chinese](README.md)
-
-Transparent Chat viewer app for IRL streaming
-
+<br><br>
 
 ## Features
 
