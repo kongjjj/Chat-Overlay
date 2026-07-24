@@ -13,7 +13,7 @@ Transparent Chat viewer app for IRL streaming.
 
 
 ## [Traditional Chinese](README.md)
-<br><br>
+<br>
 
 ## Features
 
