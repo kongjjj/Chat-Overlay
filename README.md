@@ -10,11 +10,8 @@
 [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
 [![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/kongjjj/Chat-Overlay)
 </div>
-
-
 ## [English](README_EN.md)
 <br><br>
-
 ## 功能
 
 - ✔️ Twitch、Youtube聊天室顯示。
