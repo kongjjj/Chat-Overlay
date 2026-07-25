@@ -15,7 +15,8 @@
 
 **繁體中文** | [English](README_EN.md) 
 
-<br>
+---
+
 ## 功能
 
 - ✔️ Twitch、Youtube聊天室顯示。
