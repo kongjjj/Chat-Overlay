@@ -13,7 +13,7 @@
 [![Release](https://img.shields.io/github/release/kongjjj/Chat-Overlay?color=0000FF&label=Release&style=for-the-badge)](https://github.com/kongjjj/Chat-Overlay/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/kongjjj/Chat-Overlay/total?label=Downloads&style=for-the-badge&color=lightgreen)](https://github.com/kongjjj/Chat-Overlay/releases)
 
-**繁體中文** | [English](README_EN.md) 
+**繁體中文** | [English](README_EN.md) | [日本語](README_JP.md) 
 </div>
 
 ---
