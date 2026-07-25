@@ -45,7 +45,7 @@ I will publish the latest .apk file in the [GitHub releases](https://github.com/
 
 You can open the GitHub releases page on your phone, download the .apk file, and install it.
 
-
+---
 
 ## Other projects I have made
 - [Live Streaming Camera](https://github.com/kongjjj/Live-Streaming-Camera)：An Android live streaming app built using Chinese language.
