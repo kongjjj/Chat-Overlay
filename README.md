@@ -10,7 +10,7 @@
 [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
 [![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/kongjjj/Chat-Overlay)
 [![Release](https://img.shields.io/github/release/kongjjj/Chat-Overlay?color=0000FF&label=Release&style=for-the-badge)](https://github.com/kongjjj/Chat-Overlay/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/kongjjj/Chat-Overlay/total?label=Downloads&style=for-the-badge&logocolor=lightgreen)](https://github.com/kongjjj/Chat-Overlay/releases)
+[![Downloads](https://img.shields.io/github/downloads/kongjjj/Chat-Overlay/total?label=Downloads&style=for-the-badge&color=lightgreen&logoColor=white)](https://github.com/kongjjj/Chat-Overlay/releases)
 </div>
 
 ## [English here](README_EN.md)
