@@ -4,7 +4,7 @@
 
 <h1>Chat Overlay</h1>
 
-一個Android透明 Youtube/Twitch聊天室overlay給直播使用。
+Android向けの透明なYouTube/Twitchチャットオーバーレイ、ライブ配信で使用するもの。
 <br><br>
 [![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)](https://twitch.tv)
 [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
@@ -18,35 +18,35 @@
 
 ---
 
-## 功能
+## 機能
 
-- ✔️ Twitch、Youtube聊天室顯示。
-- ✔️ Text-to-Speech聊天訊息朗讀。
-- ✔️ 3種語言選擇，繁體中文、英文、日文。
-- ✔️ 文字大小、行距、人名、表情符號大小可各自調較。
-- ✔️ 透明聊天方塊可任意移動和調整大小。
-- ✔️ UI在3秒後會自動隱藏，只剩下留言部份顯示，按一下留言左半部份，可恢復UI顯示。
+- ✔️ Twitch、YouTubeのチャットルームを表示。
+- ✔️ Text-to-Speechによるチャットメッセージの読み上げ。
+- ✔️ 3つの言語から選択可能：繁体字中国語、英語、日本語。
+- ✔️ 文字サイズ、行間、ユーザー名、絵文字のサイズを個別に調整可能。
+- ✔️ 透明なチャットウィンドウは自由に移動・サイズ変更可能。
+- ✔️ UIは3秒後に自動的に非表示になり、コメント部分のみが表示されます。コメントの左半分をタップするとUIが再表示されます。
 
 ![Chat-Overlay](pics/Screenshot_7C.jpg)
 
 ---
 
 ## 使用方法
-- UI介面按鍵說明。
+- UIインターフェースのボタン説明。
 ![Chat-Overlay](pics/Screenshot_6C.jpg)
-- 配合其他直播軟件使用時的畫面。UI未消失時。
+- 他の配信ソフトと連携して使用する際の画面。UIが表示されている状態。
 ![Chat-Overlay](pics/Screenshot_4.jpg)
-- UI消失後。
+- UI非表示後。
 ![Chat-Overlay](pics/Screenshot_5.jpg)
 
 ---
 
-## 安裝方法
-我會在 [GitHub releases](https://github.com/kongjjj/Chat-Overlay/releases) 內發布最新 .apk 檔案。
+## インストール方法
+[GitHub releases](https://github.com/kongjjj/Chat-Overlay/releases) にて最新の .apk ファイルを公開します。
 
-可以在手機上開啟 GitHub 發行頁面，下載 .apk 檔案並安裝。 
+スマートフォンで GitHub のリリースページを開き、.apk ファイルをダウンロードしてインストールしてください。
 
 ---
 
-## 我製作的其他程式
-- [Live Streaming Camera](https://github.com/kongjjj/Live-Streaming-Camera)：一個使用中文製作的Android直播程式。 
+## その他の制作アプリ
+- [Live Streaming Camera](https://github.com/kongjjj/Live-Streaming-Camera)：繁體中国語で作成されたAndroid向けライブ配信アプリです。
