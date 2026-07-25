@@ -13,8 +13,8 @@ An Android Transparent Youtube/Twitch Chat viewer app for IRL streaming.
 [![Downloads](https://img.shields.io/github/downloads/kongjjj/Chat-Overlay/total?label=Downloads&style=for-the-badge&color=lightgreen)](https://github.com/kongjjj/Chat-Overlay/releases)
 </div>
 
+**English** | [繁體中文](README.md) 
 
-## [Traditional Chinese](README.md)
 <br>
 ## Features
 
