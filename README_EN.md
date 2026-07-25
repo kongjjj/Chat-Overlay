@@ -29,7 +29,7 @@ An Android Transparent Youtube/Twitch Chat viewer app for IRL streaming.
 
 ![Chat-Overlay](pics/Screenshot_1EN.jpg)
 
-
+---
 
 ## Usage
 ![Chat-Overlay](pics/Screenshot_3E.jpg)
@@ -38,7 +38,7 @@ An Android Transparent Youtube/Twitch Chat viewer app for IRL streaming.
 - After UI Disappears.
 ![Chat-Overlay](pics/Screenshot_5.jpg)
 
-
+---
 
 ## Installation Method
 I will publish the latest .apk file in the [GitHub releases](https://github.com/kongjjj/Chat-Overlay/releases) 
