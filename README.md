@@ -15,7 +15,6 @@
 
 **繁體中文** | [English](README_EN.md) |
 
-## [English here](README_EN.md)
 <br>
 ## 功能
 
