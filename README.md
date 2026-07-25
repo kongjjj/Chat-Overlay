@@ -28,7 +28,7 @@
 
 ![Chat-Overlay](pics/Screenshot_7C.jpg)
 
-
+---
 
 ## 使用方法
 - UI介面按鍵說明。
@@ -38,7 +38,7 @@
 - UI消失後。
 ![Chat-Overlay](pics/Screenshot_5.jpg)
 
-
+---
 
 ## 安裝方法
 我會在 [GitHub releases](https://github.com/kongjjj/Chat-Overlay/releases) 內發布最新 .apk 檔案。
