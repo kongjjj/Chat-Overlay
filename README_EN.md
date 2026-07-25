@@ -16,6 +16,7 @@ An Android Transparent Youtube/Twitch Chat viewer app for IRL streaming.
 **English** | [繁體中文](README.md) 
 
 <br>
+---
 ## Features
 
 - ✔️ Display in Twitch and YouTube chatrooms.
