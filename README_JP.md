@@ -33,7 +33,7 @@ Android向けの透明なYouTube/Twitchチャットオーバーレイ、ライ�
 
 ## 使用方法
 - UIインターフェースのボタン説明。
-![Chat-Overlay](pics/Screenshot_6C.jpg)
+![Chat-Overlay](pics/Screenshot_6J.jpg)
 - 他の配信ソフトと連携して使用する際の画面。UIが表示されている状態。
 ![Chat-Overlay](pics/Screenshot_4.jpg)
 - UI非表示後。
