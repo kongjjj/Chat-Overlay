@@ -27,7 +27,7 @@ Android向けの透明なYouTube/Twitchチャットオーバーレイ、ライ�
 - ✔️ 透明なチャットウィンドウは自由に移動・サイズ変更可能。
 - ✔️ UIは3秒後に自動的に非表示になり、コメント部分のみが表示されます。コメントの左半分をタップするとUIが再表示されます。
 
-![Chat-Overlay](pics/Screenshot_7C.jpg)
+![Chat-Overlay](pics/Screenshot_7J.jpg)
 
 ---
 
