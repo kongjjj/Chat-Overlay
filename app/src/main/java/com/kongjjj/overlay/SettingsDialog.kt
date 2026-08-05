@@ -32,6 +32,10 @@ fun SettingsDialog(
     backgroundColor: String,
     appLanguage: String,
     showTimestamp: Boolean,
+    textShadow: Boolean,
+    shadowRadius: Float,
+    shadowOffsetX: Float,
+    shadowOffsetY: Float,
     ttsEnabled: Boolean,
     ttsLanguage: String,
     ttsIgnoreSender: Boolean,
@@ -47,10 +51,14 @@ fun SettingsDialog(
     onEnableFfzChange: (Boolean) -> Unit,
     onBackgroundColorChange: (String) -> Unit,
     onShowTimestampChange: (Boolean) -> Unit,
+    onTextShadowChange: (Boolean) -> Unit,
+    onShadowRadiusChange: (Float) -> Unit,
+    onShadowOffsetXChange: (Float) -> Unit,
+    onShadowOffsetYChange: (Float) -> Unit,
     onTtsEnabledChange: (Boolean) -> Unit,
     onTtsLanguageChange: (String) -> Unit,
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -70,6 +78,10 @@ fun SettingsDialog(
                 backgroundColor = backgroundColor,
                 appLanguage = appLanguage,
                 showTimestamp = showTimestamp,
+                textShadow = textShadow,
+                shadowRadius = shadowRadius,
+                shadowOffsetX = shadowOffsetX,
+                shadowOffsetY = shadowOffsetY,
                 ttsEnabled = ttsEnabled,
                 ttsLanguage = ttsLanguage,
                 ttsIgnoreSender = ttsIgnoreSender,
@@ -85,6 +97,10 @@ fun SettingsDialog(
                 onEnableFfzChange = onEnableFfzChange,
                 onBackgroundColorChange = onBackgroundColorChange,
                 onShowTimestampChange = onShowTimestampChange,
+                onTextShadowChange = onTextShadowChange,
+                onShadowRadiusChange = onShadowRadiusChange,
+                onShadowOffsetXChange = onShadowOffsetXChange,
+                onShadowOffsetYChange = onShadowOffsetYChange,
                 onTtsEnabledChange = onTtsEnabledChange,
                 onTtsLanguageChange = onTtsLanguageChange,
                 onTtsIgnoreSenderChange = onTtsIgnoreSenderChange,
@@ -111,6 +127,10 @@ fun SettingsContent(
     backgroundColor: String,
     appLanguage: String,
     showTimestamp: Boolean,
+    textShadow: Boolean,
+    shadowRadius: Float,
+    shadowOffsetX: Float,
+    shadowOffsetY: Float,
     ttsEnabled: Boolean,
     ttsLanguage: String,
     ttsIgnoreSender: Boolean,
@@ -126,6 +146,10 @@ fun SettingsContent(
     onEnableFfzChange: (Boolean) -> Unit,
     onBackgroundColorChange: (String) -> Unit,
     onShowTimestampChange: (Boolean) -> Unit,
+    onTextShadowChange: (Boolean) -> Unit,
+    onShadowRadiusChange: (Float) -> Unit,
+    onShadowOffsetXChange: (Float) -> Unit,
+    onShadowOffsetYChange: (Float) -> Unit,
     onTtsEnabledChange: (Boolean) -> Unit,
     onTtsLanguageChange: (String) -> Unit,
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
@@ -219,6 +243,42 @@ fun SettingsContent(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(getLabel("Show Timestamp", appLanguage), style = MaterialTheme.typography.bodyMedium)
             Switch(checked = showTimestamp, onCheckedChange = onShowTimestampChange)
+        }
+
+        HorizontalDivider()
+
+        // Text Shadow
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(getLabel("Text Shadow", appLanguage), style = MaterialTheme.typography.bodyMedium)
+                Switch(checked = textShadow, onCheckedChange = onTextShadowChange)
+            }
+
+            if (textShadow) {
+                Column {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text(getLabel("Shadow Radius", appLanguage), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${shadowRadius.toInt()} px", style = MaterialTheme.typography.labelMedium)
+                    }
+                    Slider(value = shadowRadius, onValueChange = onShadowRadiusChange, valueRange = 0f..20f, steps = 20, modifier = Modifier.fillMaxWidth())
+                }
+
+                Column {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text(getLabel("Shadow Offset X", appLanguage), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${shadowOffsetX.toInt()} px", style = MaterialTheme.typography.labelMedium)
+                    }
+                    Slider(value = shadowOffsetX, onValueChange = onShadowOffsetXChange, valueRange = -20f..20f, steps = 40, modifier = Modifier.fillMaxWidth())
+                }
+
+                Column {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text(getLabel("Shadow Offset Y", appLanguage), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${shadowOffsetY.toInt()} px", style = MaterialTheme.typography.labelMedium)
+                    }
+                    Slider(value = shadowOffsetY, onValueChange = onShadowOffsetYChange, valueRange = -20f..20f, steps = 40, modifier = Modifier.fillMaxWidth())
+                }
+            }
         }
 
         HorizontalDivider()
@@ -317,6 +377,10 @@ fun SettingsContent(
                 onUsernameSizeChange(DEFAULT_USERNAME_SIZE)
                 onLineSpacingChange(DEFAULT_LINE_SPACING)
                 onEmoteSizeChange(DEFAULT_EMOTE_SIZE)
+                onTextShadowChange(DEFAULT_TEXT_SHADOW)
+                onShadowRadiusChange(DEFAULT_SHADOW_RADIUS)
+                onShadowOffsetXChange(DEFAULT_SHADOW_OFFSET_X)
+                onShadowOffsetYChange(DEFAULT_SHADOW_OFFSET_Y)
             },
             modifier = Modifier.align(Alignment.End)
         ) {
@@ -378,6 +442,10 @@ fun getLabel(key: String, lang: String): String {
         "Emote Sources" to mapOf("zh-TW" to "表情符號來源", "en" to "Emote Sources", "ja" to "エモートソース"),
         "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの語言"),
         "Show Timestamp" to mapOf("zh-TW" to "顯示留言時間", "en" to "Show Timestamp", "ja" to "タイムスタンプを表示"),
+        "Text Shadow" to mapOf("zh-TW" to "文字陰影", "en" to "Text Shadow", "ja" to "文字の影"),
+        "Shadow Radius" to mapOf("zh-TW" to "陰影深度", "en" to "Shadow Radius", "ja" to "影のぼかし"),
+        "Shadow Offset X" to mapOf("zh-TW" to "陰影偏移 X", "en" to "Shadow Offset X", "ja" to "影のオフセット X"),
+        "Shadow Offset Y" to mapOf("zh-TW" to "陰影偏移 Y", "en" to "Shadow Offset Y", "ja" to "影のオフセット Y"),
     )
     return labels[key]?.get(lang) ?: key
 }

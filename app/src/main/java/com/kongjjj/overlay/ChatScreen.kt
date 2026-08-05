@@ -44,6 +44,10 @@ fun ChatScreen(
     chatUsernameSize: Float,
     animatedEmotes: Boolean,
     showTimestamp: Boolean = false,
+    textShadow: Boolean = DEFAULT_TEXT_SHADOW,
+    shadowRadius: Float = DEFAULT_SHADOW_RADIUS,
+    shadowOffsetX: Float = DEFAULT_SHADOW_OFFSET_X,
+    shadowOffsetY: Float = DEFAULT_SHADOW_OFFSET_Y,
     showChrome: Boolean = true,
     onConnect: () -> Unit
 ) {
@@ -208,6 +212,10 @@ fun ChatScreen(
                         emoteSize = chatEmoteSize,
                         usernameSize = chatUsernameSize,
                         showTimestamp = showTimestamp,
+                        textShadow = textShadow,
+                        shadowRadius = shadowRadius,
+                        shadowOffsetX = shadowOffsetX,
+                        shadowOffsetY = shadowOffsetY,
                         imageLoader = imageLoader
                     )
                 }
@@ -226,6 +234,10 @@ private fun ChatMessageRow(
     emoteSize: Float,
     usernameSize: Float,
     showTimestamp: Boolean,
+    textShadow: Boolean,
+    shadowRadius: Float,
+    shadowOffsetX: Float,
+    shadowOffsetY: Float,
     imageLoader: ImageLoader
 ) {
     val badgeSize = (fontSize * 1.1f).sp
@@ -353,11 +365,11 @@ private fun ChatMessageRow(
             fontWeight = FontWeight.Bold,
             fontSize = fontSize.sp,
             lineHeight = (fontSize + lineSpacing).sp,
-            shadow = Shadow(
+            shadow = if (textShadow) Shadow(
                 color = Color.Black,
-                offset = Offset(2f, 2f),
-                blurRadius = 4f
-            )
+                offset = Offset(shadowOffsetX, shadowOffsetY),
+                blurRadius = shadowRadius
+            ) else null
         ),
         modifier = Modifier
             .fillMaxWidth()

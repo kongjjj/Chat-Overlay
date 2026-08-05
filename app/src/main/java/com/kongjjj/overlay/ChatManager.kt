@@ -23,6 +23,10 @@ class ChatManager private constructor(context: Context) {
     val chatLineSpacing = MutableStateFlow(DEFAULT_LINE_SPACING)
     val chatEmoteSize = MutableStateFlow(DEFAULT_EMOTE_SIZE)
     val chatUsernameSize = MutableStateFlow(DEFAULT_USERNAME_SIZE)
+    val textShadow = MutableStateFlow(DEFAULT_TEXT_SHADOW)
+    val shadowRadius = MutableStateFlow(DEFAULT_SHADOW_RADIUS)
+    val shadowOffsetX = MutableStateFlow(DEFAULT_SHADOW_OFFSET_X)
+    val shadowOffsetY = MutableStateFlow(DEFAULT_SHADOW_OFFSET_Y)
     val animatedEmotes = MutableStateFlow(true)
     val enable7tv = MutableStateFlow(true)
     val enableBttv = MutableStateFlow(true)
@@ -47,6 +51,10 @@ class ChatManager private constructor(context: Context) {
         chatLineSpacing.value = prefs.getFloat("chat_line_spacing", DEFAULT_LINE_SPACING)
         chatEmoteSize.value = prefs.getFloat("chat_emote_size", DEFAULT_EMOTE_SIZE)
         chatUsernameSize.value = prefs.getFloat("chat_username_size", DEFAULT_USERNAME_SIZE)
+        textShadow.value = prefs.getBoolean("text_shadow", DEFAULT_TEXT_SHADOW)
+        shadowRadius.value = prefs.getFloat("shadow_radius", DEFAULT_SHADOW_RADIUS)
+        shadowOffsetX.value = prefs.getFloat("shadow_offset_x", DEFAULT_SHADOW_OFFSET_X)
+        shadowOffsetY.value = prefs.getFloat("shadow_offset_y", DEFAULT_SHADOW_OFFSET_Y)
         animatedEmotes.value = prefs.getBoolean("animated_emotes", true)
         enable7tv.value = prefs.getBoolean("enable_7tv", true)
         enableBttv.value = prefs.getBoolean("enable_bttv", true)
@@ -166,6 +174,26 @@ class ChatManager private constructor(context: Context) {
     fun saveUsernameSize(size: Float, context: Context) {
         chatUsernameSize.value = size
         context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putFloat("chat_username_size", size) }
+    }
+
+    fun saveTextShadow(enabled: Boolean, context: Context) {
+        textShadow.value = enabled
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("text_shadow", enabled) }
+    }
+
+    fun saveShadowRadius(radius: Float, context: Context) {
+        shadowRadius.value = radius
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putFloat("shadow_radius", radius) }
+    }
+
+    fun saveShadowOffsetX(offset: Float, context: Context) {
+        shadowOffsetX.value = offset
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putFloat("shadow_offset_x", offset) }
+    }
+
+    fun saveShadowOffsetY(offset: Float, context: Context) {
+        shadowOffsetY.value = offset
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putFloat("shadow_offset_y", offset) }
     }
 
     fun saveAnimatedEmotes(enabled: Boolean, context: Context) {

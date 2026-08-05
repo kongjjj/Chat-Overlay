@@ -192,6 +192,10 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     val usernameSize by chatManager.chatUsernameSize.collectAsState()
                     val animated by chatManager.animatedEmotes.collectAsState()
                     val showTimestamp by chatManager.showTimestamp.collectAsState()
+                    val textShadow by chatManager.textShadow.collectAsState()
+                    val shadowRadius by chatManager.shadowRadius.collectAsState()
+                    val shadowOffsetX by chatManager.shadowOffsetX.collectAsState()
+                    val shadowOffsetY by chatManager.shadowOffsetY.collectAsState()
                     val backgroundColor by chatManager.backgroundColor.collectAsState()
                     val isVisible by uiVisible
                     
@@ -221,6 +225,10 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             chatUsernameSize = usernameSize,
                             animatedEmotes = animated,
                             showTimestamp = showTimestamp,
+                            textShadow = textShadow,
+                            shadowRadius = shadowRadius,
+                            shadowOffsetX = shadowOffsetX,
+                            shadowOffsetY = shadowOffsetY,
                             showChrome = isVisible,
                         ) {
                             chatManager.connect()

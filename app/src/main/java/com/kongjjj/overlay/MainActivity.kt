@@ -7,6 +7,7 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         
         setContent {
@@ -137,6 +139,10 @@ class MainActivity : ComponentActivity() {
                             backgroundColor = backgroundColor,
                             appLanguage = appLanguage,
                             showTimestamp = showTimestamp,
+                            textShadow = chatManager.textShadow.collectAsState().value,
+                            shadowRadius = chatManager.shadowRadius.collectAsState().value,
+                            shadowOffsetX = chatManager.shadowOffsetX.collectAsState().value,
+                            shadowOffsetY = chatManager.shadowOffsetY.collectAsState().value,
                             ttsEnabled = ttsEnabled,
                             ttsLanguage = ttsLanguage,
                             ttsIgnoreSender = ttsIgnoreSender,
@@ -152,6 +158,10 @@ class MainActivity : ComponentActivity() {
                             onEnableFfzChange = { chatManager.saveEnableFfz(it, this@MainActivity) },
                             onBackgroundColorChange = { chatManager.saveBackgroundColor(it, this@MainActivity) },
                             onShowTimestampChange = { chatManager.saveShowTimestamp(it, this@MainActivity) },
+                            onTextShadowChange = { chatManager.saveTextShadow(it, this@MainActivity) },
+                            onShadowRadiusChange = { chatManager.saveShadowRadius(it, this@MainActivity) },
+                            onShadowOffsetXChange = { chatManager.saveShadowOffsetX(it, this@MainActivity) },
+                            onShadowOffsetYChange = { chatManager.saveShadowOffsetY(it, this@MainActivity) },
                             onTtsEnabledChange = { chatManager.saveTtsEnabled(it, this@MainActivity) },
                             onTtsLanguageChange = { chatManager.saveTtsLanguage(it, this@MainActivity) },
                             onTtsIgnoreSenderChange = { chatManager.saveTtsIgnoreSender(it, this@MainActivity) },
