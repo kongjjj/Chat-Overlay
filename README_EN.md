@@ -23,7 +23,7 @@ An Android Transparent Youtube/Twitch Chat viewer app for IRL streaming.
 - ✔️ Display in Twitch and YouTube chatrooms.
 - ✔️ Text-to-Speech reading of chat messages.
 - ✔️ 3 language options: Traditional Chinese, English, and Japanese.
-- ✔️ Font size, line spacing, usernames, and emoji size can be adjusted individually.
+- ✔️ Font size, shadow, line spacing, usernames, and emoji size can be adjusted individually.
 - ✔️ The transparent chat box can be freely moved and resized.
 - ✔️ The UI will automatically hide after 3 seconds, and only the comment section will remain visible. Clicking the left half of the comment section will bring back the UI.
 
