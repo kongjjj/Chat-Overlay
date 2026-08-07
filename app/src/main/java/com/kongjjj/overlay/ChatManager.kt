@@ -4,11 +4,14 @@ import android.content.Context
 import androidx.core.content.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-class ChatManager private constructor(context: Context) {
+class ChatManager private constructor(private val context: Context) {
     private val scope = CoroutineScope(Dispatchers.Main)
     
     val twitchClient = TwitchChatClient()
@@ -34,7 +37,10 @@ class ChatManager private constructor(context: Context) {
     val backgroundColor = MutableStateFlow("transparent") // "transparent" or "black"
     val appLanguage = MutableStateFlow("zh-TW") // "zh-TW", "en", "ja"
     val showTimestamp = MutableStateFlow(false)
-    
+
+    private val _systemMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
+    val systemMessages: StateFlow<List<ChatMessage>> = _systemMessages.asStateFlow()
+
     // TTS Settings
     val ttsEnabled = MutableStateFlow(false)
     val ttsIgnoreSender = MutableStateFlow(false)
@@ -45,6 +51,14 @@ class ChatManager private constructor(context: Context) {
     init {
         // Load settings from SharedPreferences
         val prefs = context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE)
+        
+        twitchClient.onReconnect = {
+            addSystemMessage(context.getString(R.string.reconnecting_twitch))
+        }
+        youtubeClient.onReconnect = {
+            addSystemMessage(context.getString(R.string.reconnecting_youtube))
+        }
+
         twitchChannel.value = prefs.getString("twitch_channel", "") ?: ""
         youtubeChannelId.value = prefs.getString("youtube_channel_id", "") ?: ""
         chatFontSize.value = prefs.getFloat("chat_font_size", DEFAULT_FONT_SIZE)
@@ -123,13 +137,36 @@ class ChatManager private constructor(context: Context) {
         ttsManager.setLanguage(locale)
     }
 
+    fun addSystemMessage(text: String) {
+        // Check if message with same text already exists to avoid duplicates
+        if (_systemMessages.value.any { it.message == text }) return
+
+        val message = ChatMessage(
+            id = java.util.UUID.randomUUID().toString(),
+            username = "System",
+            message = text,
+            platform = "system",
+            timestamp = System.currentTimeMillis()
+        )
+        // Add to system messages
+        _systemMessages.value = (_systemMessages.value + message).takeLast(5)
+        
+        // Auto-remove after 7 seconds
+        scope.launch {
+            delay(7_000)
+            _systemMessages.value = _systemMessages.value.filter { it.id != message.id }
+        }
+    }
+
     fun connect() {
         if (twitchChannel.value.isNotEmpty()) {
+            addSystemMessage(context.getString(R.string.reconnecting_twitch))
             twitchClient.connect(twitchChannel.value)
         } else {
             twitchClient.disconnect()
         }
         if (youtubeChannelId.value.isNotEmpty()) {
+            addSystemMessage(context.getString(R.string.reconnecting_youtube))
             youtubeClient.connect(youtubeChannelId.value)
         } else {
             youtubeClient.disconnect()

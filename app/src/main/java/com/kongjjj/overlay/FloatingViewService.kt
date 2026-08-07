@@ -84,6 +84,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         floatingView.findViewById<View>(R.id.top_controls_container)?.visibility = if (visible) View.VISIBLE else View.GONE
         floatingView.findViewById<View>(R.id.resize_handle)?.visibility = if (visible) View.VISIBLE else View.GONE
         floatingView.findViewById<View>(R.id.drag_handle)?.visibility = if (visible) View.VISIBLE else View.GONE
+        floatingView.findViewById<View>(R.id.btn_reconnect)?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     override fun onCreate() {
@@ -174,9 +175,10 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     
                     val twitchMessages by chatManager.twitchClient.messages.collectAsState()
                     val youtubeMessages by chatManager.youtubeClient.messages.collectAsState()
+                    val systemMessages by chatManager.systemMessages.collectAsState()
                     
-                    val chatMessages = remember(twitchChannel, youtubeChannelId, twitchMessages, youtubeMessages) {
-                        (twitchMessages + youtubeMessages).sortedBy { it.timestamp ?: 0L }.takeLast(MAX_CHAT_MESSAGES)
+                    val chatMessages = remember(twitchChannel, youtubeChannelId, twitchMessages, youtubeMessages, systemMessages) {
+                        (twitchMessages + youtubeMessages + systemMessages).sortedBy { it.timestamp ?: 0L }.takeLast(MAX_CHAT_MESSAGES)
                     }
 
                     val twitchConnected by chatManager.twitchClient.connected.collectAsState()
@@ -252,6 +254,12 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         val minimizedIcon = floatingView.findViewById<View>(R.id.minimized_icon)
         val mainContentContainer = floatingView.findViewById<View>(R.id.main_content_container)
         val resizeHandle = floatingView.findViewById<View>(R.id.resize_handle)
+        val btnReconnect = floatingView.findViewById<View>(R.id.btn_reconnect)
+
+        btnReconnect.setOnClickListener {
+            resetHideTimer()
+            chatManager.connect()
+        }
 
         floatingView.findViewById<View>(R.id.btn_restore).setOnClickListener {
             resetHideTimer()

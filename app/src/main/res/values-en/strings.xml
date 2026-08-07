@@ -21,4 +21,7 @@
     <string name="desc_collapse">Collapse</string>
     <string name="desc_restore">Restore</string>
     <string name="desc_resize">Resize</string>
+    <string name="desc_reconnect">Reconnect</string>
+    <string name="reconnecting_twitch">Connecting to Twitch chat room</string>
+    <string name="reconnecting_youtube">Connecting to YouTube chat room</string>
 </resources>

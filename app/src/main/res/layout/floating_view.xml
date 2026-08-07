@@ -83,6 +83,18 @@
             android:contentDescription="@string/desc_resize"
             android:clickable="true"
             android:focusable="true" />
+
+        <!-- Reconnect button (bottom left) -->
+        <ImageView
+            android:id="@+id/btn_reconnect"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="4dp"
+            android:src="@drawable/ic_reconnect"
+            android:contentDescription="@string/desc_reconnect"
+            android:clickable="true"
+            android:focusable="true" />
     </FrameLayout>
 
     <!-- Minimized Icon (Visible when overlay is collapsed) -->

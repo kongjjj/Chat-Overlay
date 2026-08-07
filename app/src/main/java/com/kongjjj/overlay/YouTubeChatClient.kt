@@ -40,6 +40,8 @@ class YouTubeChatClient {
     private var apiKey: String? = null
     private var continuation: String? = null
 
+    var onReconnect: (() -> Unit)? = null
+
     fun connect(channelId: String) {
         if (channelId == currentChannelId && _connected.value) return
         
@@ -269,6 +271,7 @@ class YouTubeChatClient {
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Error polling chat", e)
+                onReconnect?.invoke()
             }
             delay(5.seconds) // Poll every 5 seconds to avoid rate limiting
         }

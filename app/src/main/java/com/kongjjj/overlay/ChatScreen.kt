@@ -314,44 +314,51 @@ private fun ChatMessageRow(
             if (timestampText.isNotEmpty()) {
                 withStyle(SpanStyle(color = Color.LightGray.copy(alpha = 0.8f), fontSize = (fontSize * 0.8f).sp)) {
                     append(timestampText)
+                    append(' ')
                 }
             }
 
-            if (message.platform == "youtube" || message.platform == "twitch") {
-                appendInlineContent("platform_icon", "[${message.platform}]")
-                append(' ')
-            }
-
-            // Twitch: badges BEFORE name
-            if (message.platform == "twitch") {
-                badgeUrls.forEachIndexed { i, url ->
-                    appendInlineContent(url, "[badge]")
-                    if (i < badgeUrls.lastIndex) append('\u2009') else append(' ')
+            if (message.platform == "system") {
+                withStyle(SpanStyle(color = Color.Yellow, fontWeight = FontWeight.Bold)) {
+                    append(message.message)
                 }
-            }
-
-            withStyle(SpanStyle(color = nameColor, fontWeight = FontWeight.SemiBold, fontSize = usernameSize.sp)) {
-                append(message.username)
-                if (message.login != null && !message.login.equals(message.username, ignoreCase = true)) {
-                    append(" (${message.login})")
+            } else {
+                if (message.platform == "youtube" || message.platform == "twitch") {
+                    appendInlineContent("platform_icon", "[${message.platform}]")
+                    append(' ')
                 }
-            }
 
-            // YouTube: badges AFTER name
-            if (message.platform == "youtube") {
-                badgeUrls.forEachIndexed { i, url ->
-                    if (i == 0) append(' ')
-                    appendInlineContent(url, "[badge]")
-                    if (i < badgeUrls.lastIndex) append('\u2009')
+                // Twitch: badges BEFORE name
+                if (message.platform == "twitch") {
+                    badgeUrls.forEachIndexed { i, url ->
+                        appendInlineContent(url, "[badge]")
+                        if (i < badgeUrls.lastIndex) append('\u2009') else append(' ')
+                    }
                 }
-            }
 
-            append(": ")
-            segments.forEach { seg ->
-                when (seg) {
-                    is MessageSegment.TextPart  -> append(seg.text)
-                    is MessageSegment.EmotePart -> appendInlineContent(seg.url, "[${seg.name}]")
-                    is MessageSegment.LinkPart  -> append(seg.text)
+                withStyle(SpanStyle(color = nameColor, fontWeight = FontWeight.SemiBold, fontSize = usernameSize.sp)) {
+                    append(message.username)
+                    if (message.login != null && !message.login.equals(message.username, ignoreCase = true)) {
+                        append(" (${message.login})")
+                    }
+                }
+
+                // YouTube: badges AFTER name
+                if (message.platform == "youtube") {
+                    badgeUrls.forEachIndexed { i, url ->
+                        if (i == 0) append(' ')
+                        appendInlineContent(url, "[badge]")
+                        if (i < badgeUrls.lastIndex) append('\u2009')
+                    }
+                }
+
+                append(": ")
+                segments.forEach { seg ->
+                    when (seg) {
+                        is MessageSegment.TextPart -> append(seg.text)
+                        is MessageSegment.EmotePart -> appendInlineContent(seg.url, "[${seg.name}]")
+                        is MessageSegment.LinkPart -> append(seg.text)
+                    }
                 }
             }
         }

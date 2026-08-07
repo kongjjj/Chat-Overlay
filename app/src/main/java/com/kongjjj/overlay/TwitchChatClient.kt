@@ -37,6 +37,8 @@ class TwitchChatClient {
     private var shouldBeConnected = false
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    var onReconnect: (() -> Unit)? = null
+
     fun connect(channel: String) {
         val normalizedChannel = channel.lowercase().trim()
         if (normalizedChannel == currentChannel && _connected.value) return
@@ -100,7 +102,10 @@ class TwitchChatClient {
         scope.launch {
             delay(5.seconds)
             currentChannel?.let { 
-                if (shouldBeConnected) connect(it) 
+                if (shouldBeConnected) {
+                    onReconnect?.invoke()
+                    connect(it)
+                }
             }
         }
     }
