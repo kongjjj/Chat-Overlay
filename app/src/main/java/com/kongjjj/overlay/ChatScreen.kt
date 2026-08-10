@@ -8,6 +8,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,6 +47,9 @@ fun ChatScreen(
     chatUsernameSize: Float,
     animatedEmotes: Boolean,
     showTimestamp: Boolean = false,
+    showStreamInfo: Boolean = true,
+    viewersCount: Int = 0,
+    uptimeText: String = "",
     textShadow: Boolean = DEFAULT_TEXT_SHADOW,
     shadowRadius: Float = DEFAULT_SHADOW_RADIUS,
     shadowOffsetX: Float = DEFAULT_SHADOW_OFFSET_X,
@@ -163,6 +169,7 @@ fun ChatScreen(
                             }
                         }
                     }
+
                     if (!chatConnected) {
                         TextButton(onClick = onConnect) { Text("Reconnect") }
                     }
@@ -172,6 +179,68 @@ fun ChatScreen(
                 }
             }
             HorizontalDivider()
+        }
+
+        // ── Stream Info (Persistently visible if enabled, below divider) ──────
+        if (showStreamInfo && (viewersCount > 0 || uptimeText.isNotEmpty())) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (viewersCount > 0) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Visibility,
+                            contentDescription = "Viewers",
+                            tint = Color.White,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = viewersCount.toString(),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                shadow = if (textShadow) Shadow(
+                                    color = Color.Black,
+                                    offset = Offset(shadowOffsetX, shadowOffsetY),
+                                    blurRadius = shadowRadius
+                                ) else null
+                            ),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                if (uptimeText.isNotEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = "Uptime",
+                            tint = Color.White,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = uptimeText,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                shadow = if (textShadow) Shadow(
+                                    color = Color.Black,
+                                    offset = Offset(shadowOffsetX, shadowOffsetY),
+                                    blurRadius = shadowRadius
+                                ) else null
+                            ),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
         }
 
         // ── Messages / empty states ───────────────────────────────────────────

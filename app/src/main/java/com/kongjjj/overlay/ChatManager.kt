@@ -1,15 +1,28 @@
 package com.kongjjj.overlay
 
 import android.content.Context
+import android.util.Log
 import androidx.core.content.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.TimeZone
+import kotlin.time.Duration.Companion.seconds
 
 class ChatManager private constructor(private val context: Context) {
     private val scope = CoroutineScope(Dispatchers.Main)
@@ -37,6 +50,16 @@ class ChatManager private constructor(private val context: Context) {
     val backgroundColor = MutableStateFlow("transparent") // "transparent" or "black"
     val appLanguage = MutableStateFlow("zh-TW") // "zh-TW", "en", "ja"
     val showTimestamp = MutableStateFlow(false)
+    val showStreamInfo = MutableStateFlow(DEFAULT_SHOW_STREAM_INFO)
+
+    // Stream Info state
+    val viewersCount = MutableStateFlow(0)
+    val streamStartTime = MutableStateFlow<Long?>(null)
+    val uptimeText = MutableStateFlow("")
+
+    private var viewerUpdateJob: Job? = null
+    private var uptimeUpdateJob: Job? = null
+    private val httpClient = OkHttpClient()
 
     private val _systemMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val systemMessages: StateFlow<List<ChatMessage>> = _systemMessages.asStateFlow()
@@ -76,6 +99,7 @@ class ChatManager private constructor(private val context: Context) {
         backgroundColor.value = prefs.getString("background_color", "transparent") ?: "transparent"
         appLanguage.value = prefs.getString("app_language", "zh-TW") ?: "zh-TW"
         showTimestamp.value = prefs.getBoolean("show_timestamp", false)
+        showStreamInfo.value = prefs.getBoolean("show_stream_info", DEFAULT_SHOW_STREAM_INFO)
         
         ttsEnabled.value = prefs.getBoolean("tts_enabled", false)
         ttsIgnoreSender.value = prefs.getBoolean("tts_ignore_sender", false)
@@ -99,6 +123,125 @@ class ChatManager private constructor(private val context: Context) {
         // Load emotes
         scope.launch {
             emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value)
+        }
+
+        // Start stream info updates
+        startStreamInfoUpdates()
+    }
+
+    private fun startStreamInfoUpdates() {
+        stopStreamInfoUpdates()
+        viewerUpdateJob = scope.launch {
+            while (isActive) {
+                val channel = twitchChannel.value
+                if (channel.isNotBlank() && channel != "yourchannel") {
+                    var info: StreamInfo? = null
+                    try {
+                        info = withTimeout(5.seconds) {
+                            withContext(Dispatchers.IO) { fetchStreamInfo(channel) }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("ChatManager", "Failed to fetch stream info", e)
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        if (info != null) {
+                            viewersCount.value = info.viewers
+                            if (info.createdAt != streamStartTime.value) {
+                                streamStartTime.value = info.createdAt
+                                if (info.createdAt != null) {
+                                    startUptimeUpdates(info.createdAt)
+                                } else {
+                                    stopUptimeUpdates()
+                                }
+                            }
+                        } else {
+                            // If request failed, keep current uptime but maybe clear viewers?
+                            // User code keeps uptime but hides viewers count layout.
+                            // We'll just keep values as is for now.
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        viewersCount.value = 0
+                        streamStartTime.value = null
+                        stopUptimeUpdates()
+                    }
+                }
+                delay(15.seconds)
+            }
+        }
+    }
+
+    private fun stopStreamInfoUpdates() {
+        viewerUpdateJob?.cancel()
+        viewerUpdateJob = null
+        stopUptimeUpdates()
+    }
+
+    private fun startUptimeUpdates(startTime: Long) {
+        uptimeUpdateJob?.cancel()
+        uptimeUpdateJob = scope.launch {
+            while (isActive) {
+                val elapsed = System.currentTimeMillis() - startTime
+                if (elapsed >= 0) {
+                    val hours = elapsed / 3600000
+                    val minutes = (elapsed % 3600000) / 60000
+                    val seconds = (elapsed % 60000) / 1000
+                    uptimeText.value = String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
+                }
+                delay(1.seconds)
+            }
+        }
+    }
+
+    private fun stopUptimeUpdates() {
+        uptimeUpdateJob?.cancel()
+        uptimeUpdateJob = null
+        uptimeText.value = ""
+    }
+
+    private fun fetchStreamInfo(channelName: String): StreamInfo {
+        if (channelName.isBlank()) return StreamInfo(0, null)
+        return try {
+            val request = Request.Builder()
+                .url("https://gql.twitch.tv/gql")
+                .addHeader("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko")
+                .addHeader("Content-Type", "application/json")
+                .post(
+                    """
+                {
+                    "query": "query { user(login: \"$channelName\") { stream { viewersCount createdAt } } }"
+                }
+                """.trimIndent().toRequestBody("application/json; charset=utf-8".toMediaType())
+                )
+                .build()
+
+            val response = httpClient.newCall(request).execute()
+            if (response.isSuccessful) {
+                val json = JSONObject(response.body?.string() ?: "{}")
+                val data = json.optJSONObject("data")
+                val user = data?.optJSONObject("user")
+                val stream = user?.optJSONObject("stream")
+                val viewers = stream?.optInt("viewersCount", 0) ?: 0
+                val createdAtStr = stream?.optString("createdAt")
+                val createdAt = if (createdAtStr != null && createdAtStr != "null") {
+                    try {
+                        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+                            timeZone = TimeZone.getTimeZone("UTC")
+                        }
+                        dateFormat.parse(createdAtStr)?.time
+                    } catch (_: Exception) {
+                        null
+                    }
+                } else null
+                StreamInfo(viewers, createdAt)
+            } else {
+                StreamInfo(0, null)
+            }
+        } catch (e: Exception) {
+            Log.e("ChatManager", "Error fetching stream info", e)
+            StreamInfo(0, null)
         }
     }
 
@@ -269,6 +412,11 @@ class ChatManager private constructor(private val context: Context) {
     fun saveShowTimestamp(show: Boolean, context: Context) {
         showTimestamp.value = show
         context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("show_timestamp", show) }
+    }
+
+    fun saveShowStreamInfo(show: Boolean, context: Context) {
+        showStreamInfo.value = show
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("show_stream_info", show) }
     }
 
     fun saveTtsEnabled(enabled: Boolean, context: Context) {

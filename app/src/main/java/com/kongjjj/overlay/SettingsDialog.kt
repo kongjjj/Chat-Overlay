@@ -32,6 +32,7 @@ fun SettingsDialog(
     backgroundColor: String,
     appLanguage: String,
     showTimestamp: Boolean,
+    showStreamInfo: Boolean,
     textShadow: Boolean,
     shadowRadius: Float,
     shadowOffsetX: Float,
@@ -51,6 +52,7 @@ fun SettingsDialog(
     onEnableFfzChange: (Boolean) -> Unit,
     onBackgroundColorChange: (String) -> Unit,
     onShowTimestampChange: (Boolean) -> Unit,
+    onShowStreamInfoChange: (Boolean) -> Unit,
     onTextShadowChange: (Boolean) -> Unit,
     onShadowRadiusChange: (Float) -> Unit,
     onShadowOffsetXChange: (Float) -> Unit,
@@ -78,6 +80,7 @@ fun SettingsDialog(
                 backgroundColor = backgroundColor,
                 appLanguage = appLanguage,
                 showTimestamp = showTimestamp,
+                showStreamInfo = showStreamInfo,
                 textShadow = textShadow,
                 shadowRadius = shadowRadius,
                 shadowOffsetX = shadowOffsetX,
@@ -97,6 +100,7 @@ fun SettingsDialog(
                 onEnableFfzChange = onEnableFfzChange,
                 onBackgroundColorChange = onBackgroundColorChange,
                 onShowTimestampChange = onShowTimestampChange,
+                onShowStreamInfoChange = onShowStreamInfoChange,
                 onTextShadowChange = onTextShadowChange,
                 onShadowRadiusChange = onShadowRadiusChange,
                 onShadowOffsetXChange = onShadowOffsetXChange,
@@ -127,6 +131,7 @@ fun SettingsContent(
     backgroundColor: String,
     appLanguage: String,
     showTimestamp: Boolean,
+    showStreamInfo: Boolean,
     textShadow: Boolean,
     shadowRadius: Float,
     shadowOffsetX: Float,
@@ -146,6 +151,7 @@ fun SettingsContent(
     onEnableFfzChange: (Boolean) -> Unit,
     onBackgroundColorChange: (String) -> Unit,
     onShowTimestampChange: (Boolean) -> Unit,
+    onShowStreamInfoChange: (Boolean) -> Unit,
     onTextShadowChange: (Boolean) -> Unit,
     onShadowRadiusChange: (Float) -> Unit,
     onShadowOffsetXChange: (Float) -> Unit,
@@ -243,6 +249,12 @@ fun SettingsContent(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(getLabel("Show Timestamp", appLanguage), style = MaterialTheme.typography.bodyMedium)
             Switch(checked = showTimestamp, onCheckedChange = onShowTimestampChange)
+        }
+
+        // Show Stream Info
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(getLabel("Show Stream Info", appLanguage), style = MaterialTheme.typography.bodyMedium)
+            Switch(checked = showStreamInfo, onCheckedChange = onShowStreamInfoChange)
         }
 
         HorizontalDivider()
@@ -442,6 +454,7 @@ fun getLabel(key: String, lang: String): String {
         "Emote Sources" to mapOf("zh-TW" to "表情符號來源", "en" to "Emote Sources", "ja" to "エモートソース"),
         "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの語言"),
         "Show Timestamp" to mapOf("zh-TW" to "顯示留言時間", "en" to "Show Timestamp", "ja" to "タイムスタンプを表示"),
+        "Show Stream Info" to mapOf("zh-TW" to "顯示直播資訊", "en" to "Show Stream Info", "ja" to "配信情報を表示"),
         "Text Shadow" to mapOf("zh-TW" to "文字陰影", "en" to "Text Shadow", "ja" to "文字の影"),
         "Shadow Radius" to mapOf("zh-TW" to "陰影深度", "en" to "Shadow Radius", "ja" to "影のぼかし"),
         "Shadow Offset X" to mapOf("zh-TW" to "陰影偏移 X", "en" to "Shadow Offset X", "ja" to "影のオフセット X"),

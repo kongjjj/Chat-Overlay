@@ -30,8 +30,14 @@
 
         <service
             android:name=".FloatingViewService"
-            android:exported="false"
+            android:exported="true"
             android:foregroundServiceType="specialUse">
+
+            <intent-filter>
+                <action android:name="com.kongjjj.overlay.ACTION_SHOW" />
+                <action android:name="com.kongjjj.overlay.ACTION_HIDE" />
+                <action android:name="com.kongjjj.overlay.ACTION_TOGGLE" />
+            </intent-filter>
 
             <!-- 添加使用理由（必须） -->
             <property

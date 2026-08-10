@@ -9,3 +9,4 @@ const val DEFAULT_TEXT_SHADOW = true
 const val DEFAULT_SHADOW_RADIUS = 4f
 const val DEFAULT_SHADOW_OFFSET_X = 2f
 const val DEFAULT_SHADOW_OFFSET_Y = 2f
+const val DEFAULT_SHOW_STREAM_INFO = true

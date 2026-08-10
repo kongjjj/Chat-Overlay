@@ -12,3 +12,8 @@ data class ChatMessage(
     val timestamp: Long? = null,
     val platform: String = "twitch"
 )
+
+data class StreamInfo(
+    val viewers: Int,
+    val createdAt: Long?
+)

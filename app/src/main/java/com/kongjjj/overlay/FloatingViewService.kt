@@ -60,6 +60,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private var savedHeight = 0
     private var isCollapsed = false
     private val uiVisible = mutableStateOf(value = true)
+    private var isFirstStart = true
     private var hideJob: Job? = null
     private val serviceScope = MainScope()
 
@@ -80,6 +81,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     private fun updateViewsVisibility() {
         if (!::floatingView.isInitialized) return
+        if (floatingView.visibility != View.VISIBLE) return
         val visible = uiVisible.value
         floatingView.findViewById<View>(R.id.top_controls_container)?.visibility = if (visible) View.VISIBLE else View.GONE
         floatingView.findViewById<View>(R.id.resize_handle)?.visibility = if (visible) View.VISIBLE else View.GONE
@@ -200,6 +202,10 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     val shadowOffsetY by chatManager.shadowOffsetY.collectAsState()
                     val backgroundColor by chatManager.backgroundColor.collectAsState()
                     val isVisible by uiVisible
+
+                    val showStreamInfo by chatManager.showStreamInfo.collectAsState()
+                    val viewersCount by chatManager.viewersCount.collectAsState()
+                    val uptimeText by chatManager.uptimeText.collectAsState()
                     
                     Box(
                         modifier = Modifier
@@ -232,6 +238,9 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             shadowOffsetX = shadowOffsetX,
                             shadowOffsetY = shadowOffsetY,
                             showChrome = isVisible,
+                            showStreamInfo = showStreamInfo,
+                            viewersCount = viewersCount,
+                            uptimeText = uptimeText,
                         ) {
                             chatManager.connect()
                         }
@@ -405,9 +414,48 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
     }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ACTION_SHOW -> showFloatingView()
+            ACTION_HIDE -> hideFloatingView()
+            ACTION_TOGGLE -> {
+                if (isFirstStart) {
+                    showFloatingView()
+                } else {
+                    toggleFloatingView()
+                }
+            }
+        }
+        isFirstStart = false
+        return START_STICKY
+    }
+
+    private fun toggleFloatingView() {
+        if (!::floatingView.isInitialized) return
+        if (floatingView.visibility == View.VISIBLE) {
+            hideFloatingView()
+        } else {
+            showFloatingView()
+        }
+    }
+
+    private fun showFloatingView() {
+        if (!::floatingView.isInitialized) return
+        floatingView.visibility = View.VISIBLE
+    }
+
+    private fun hideFloatingView() {
+        if (!::floatingView.isInitialized) return
+        floatingView.visibility = View.GONE
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     companion object {
+        const val ACTION_SHOW = "com.kongjjj.overlay.ACTION_SHOW"
+        const val ACTION_HIDE = "com.kongjjj.overlay.ACTION_HIDE"
+        const val ACTION_TOGGLE = "com.kongjjj.overlay.ACTION_TOGGLE"
+
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "FloatingViewServiceChannel"
         private const val CHANNEL_NAME = "Floating View Service"

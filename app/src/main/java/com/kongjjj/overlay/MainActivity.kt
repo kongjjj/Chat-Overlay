@@ -54,6 +54,7 @@ class MainActivity : ComponentActivity() {
                 val backgroundColor by chatManager.backgroundColor.collectAsState()
                 val appLanguage by chatManager.appLanguage.collectAsState()
                 val showTimestamp by chatManager.showTimestamp.collectAsState()
+                val showStreamInfo by chatManager.showStreamInfo.collectAsState()
                 val ttsEnabled by chatManager.ttsEnabled.collectAsState()
                 val ttsLanguage by chatManager.ttsLanguage.collectAsState()
                 val ttsIgnoreSender by chatManager.ttsIgnoreSender.collectAsState()
@@ -139,6 +140,7 @@ class MainActivity : ComponentActivity() {
                             backgroundColor = backgroundColor,
                             appLanguage = appLanguage,
                             showTimestamp = showTimestamp,
+                            showStreamInfo = showStreamInfo,
                             textShadow = chatManager.textShadow.collectAsState().value,
                             shadowRadius = chatManager.shadowRadius.collectAsState().value,
                             shadowOffsetX = chatManager.shadowOffsetX.collectAsState().value,
@@ -158,6 +160,7 @@ class MainActivity : ComponentActivity() {
                             onEnableFfzChange = { chatManager.saveEnableFfz(it, this@MainActivity) },
                             onBackgroundColorChange = { chatManager.saveBackgroundColor(it, this@MainActivity) },
                             onShowTimestampChange = { chatManager.saveShowTimestamp(it, this@MainActivity) },
+                            onShowStreamInfoChange = { chatManager.saveShowStreamInfo(it, this@MainActivity) },
                             onTextShadowChange = { chatManager.saveTextShadow(it, this@MainActivity) },
                             onShadowRadiusChange = { chatManager.saveShadowRadius(it, this@MainActivity) },
                             onShadowOffsetXChange = { chatManager.saveShadowOffsetX(it, this@MainActivity) },
