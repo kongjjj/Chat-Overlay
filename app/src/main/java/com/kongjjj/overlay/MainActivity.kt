@@ -17,7 +17,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.kongjjj.overlay.ui.theme.ChatOverlayTheme
 
@@ -59,6 +61,21 @@ class MainActivity : ComponentActivity() {
                 val ttsLanguage by chatManager.ttsLanguage.collectAsState()
                 val ttsIgnoreSender by chatManager.ttsIgnoreSender.collectAsState()
 
+                val context = LocalContext.current
+                val packageInfo = remember {
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            context.packageManager.getPackageInfo(context.packageName, android.content.pm.PackageManager.PackageInfoFlags.of(0))
+                        } else {
+                            @Suppress("DEPRECATION")
+                            context.packageManager.getPackageInfo(context.packageName, 0)
+                        }
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+                val versionName = packageInfo?.versionName ?: "Unknown"
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -73,6 +90,12 @@ class MainActivity : ComponentActivity() {
                             style = MaterialTheme.typography.headlineMedium
                         )
                         
+                        Text(
+                            text = "Chat viewer app for IRL streaming.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
                         Spacer(modifier = Modifier.height(32.dp))
                         
                         Button(
@@ -111,6 +134,15 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Text(getLabel("Exit App", appLanguage))
                         }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Text(
+                            text = "@2026 kongjjj  Version $versionName",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            fontSize = 10.sp
+                        )
                     }
                     
                     if (showLanguageDialog) {

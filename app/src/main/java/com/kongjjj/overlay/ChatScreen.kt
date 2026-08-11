@@ -46,6 +46,7 @@ fun ChatScreen(
     chatEmoteSize: Float,
     chatUsernameSize: Float,
     animatedEmotes: Boolean,
+    appLanguage: String,
     showTimestamp: Boolean = false,
     showStreamInfo: Boolean = true,
     viewersCount: Int = 0,
@@ -281,6 +282,7 @@ fun ChatScreen(
                         emoteSize = chatEmoteSize,
                         usernameSize = chatUsernameSize,
                         showTimestamp = showTimestamp,
+                        appLanguage = appLanguage,
                         textShadow = textShadow,
                         shadowRadius = shadowRadius,
                         shadowOffsetX = shadowOffsetX,
@@ -302,6 +304,7 @@ private fun ChatMessageRow(
     lineSpacing: Float,
     emoteSize: Float,
     usernameSize: Float,
+    appLanguage: String,
     showTimestamp: Boolean,
     textShadow: Boolean,
     shadowRadius: Float,
@@ -378,7 +381,7 @@ private fun ChatMessageRow(
         }
     }
 
-    val annotatedText = remember(message.id, thirdPartyEmotes.size, twitchBadges.size, nameColor, usernameSize, timestampText) {
+    val annotatedText = remember(message.id, thirdPartyEmotes.size, twitchBadges.size, nameColor, usernameSize, timestampText, appLanguage) {
         buildAnnotatedString {
             if (timestampText.isNotEmpty()) {
                 withStyle(SpanStyle(color = Color.LightGray.copy(alpha = 0.8f), fontSize = (fontSize * 0.8f).sp)) {
@@ -389,7 +392,12 @@ private fun ChatMessageRow(
 
             if (message.platform == "system") {
                 withStyle(SpanStyle(color = Color.Yellow, fontWeight = FontWeight.Bold)) {
-                    append(message.message)
+                    val systemText = if (message.systemMessageKey != null) {
+                        getLabel(message.systemMessageKey, appLanguage)
+                    } else {
+                        message.message
+                    }
+                    append(systemText)
                 }
             } else {
                 if (message.platform == "youtube" || message.platform == "twitch") {

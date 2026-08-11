@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.util.DisplayMetrics
 import android.view.*
 import android.widget.FrameLayout
+import androidx.core.view.isVisible
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -81,12 +82,12 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     private fun updateViewsVisibility() {
         if (!::floatingView.isInitialized) return
-        if (floatingView.visibility != View.VISIBLE) return
+        if (!floatingView.isVisible) return
         val visible = uiVisible.value
-        floatingView.findViewById<View>(R.id.top_controls_container)?.visibility = if (visible) View.VISIBLE else View.GONE
-        floatingView.findViewById<View>(R.id.resize_handle)?.visibility = if (visible) View.VISIBLE else View.GONE
-        floatingView.findViewById<View>(R.id.drag_handle)?.visibility = if (visible) View.VISIBLE else View.GONE
-        floatingView.findViewById<View>(R.id.btn_reconnect)?.visibility = if (visible) View.VISIBLE else View.GONE
+        floatingView.findViewById<View>(R.id.top_controls_container)?.isVisible = visible
+        floatingView.findViewById<View>(R.id.resize_handle)?.isVisible = visible
+        floatingView.findViewById<View>(R.id.drag_handle)?.isVisible = visible
+        floatingView.findViewById<View>(R.id.btn_reconnect)?.isVisible = visible
     }
 
     override fun onCreate() {
@@ -201,6 +202,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     val shadowOffsetX by chatManager.shadowOffsetX.collectAsState()
                     val shadowOffsetY by chatManager.shadowOffsetY.collectAsState()
                     val backgroundColor by chatManager.backgroundColor.collectAsState()
+                    val appLanguage by chatManager.appLanguage.collectAsState()
                     val isVisible by uiVisible
 
                     val showStreamInfo by chatManager.showStreamInfo.collectAsState()
@@ -232,6 +234,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             chatEmoteSize = emoteSize,
                             chatUsernameSize = usernameSize,
                             animatedEmotes = animated,
+                            appLanguage = appLanguage,
                             showTimestamp = showTimestamp,
                             textShadow = textShadow,
                             shadowRadius = shadowRadius,
@@ -242,7 +245,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             viewersCount = viewersCount,
                             uptimeText = uptimeText,
                         ) {
-                            chatManager.connect()
+                            chatManager.connect(this@FloatingViewService)
                         }
                     }
                 }
@@ -267,7 +270,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
         btnReconnect.setOnClickListener {
             resetHideTimer()
-            chatManager.connect()
+            chatManager.connect(this)
         }
 
         floatingView.findViewById<View>(R.id.btn_restore).setOnClickListener {
@@ -285,8 +288,8 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 savedWidth = params.width
                 savedHeight = params.height
                 isCollapsed = true
-                mainContentContainer.visibility = View.GONE
-                minimizedIcon.visibility = View.VISIBLE
+                mainContentContainer.isVisible = false
+                minimizedIcon.isVisible = true
                 params.width = (60 * metrics.density).toInt()
                 params.height = (60 * metrics.density).toInt()
                 windowManager.updateViewLayout(floatingView, params)
@@ -296,8 +299,8 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         minimizedIcon.setOnClickListener {
             if (isCollapsed) {
                 isCollapsed = false
-                minimizedIcon.visibility = View.GONE
-                mainContentContainer.visibility = View.VISIBLE
+                minimizedIcon.isVisible = false
+                mainContentContainer.isVisible = true
                 params.width = savedWidth
                 params.height = savedHeight
                 windowManager.updateViewLayout(floatingView, params)
@@ -342,7 +345,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     initialY = params.y
                     initialTouchX = event.rawX
                     initialTouchY = event.rawY
-                    border.visibility = View.VISIBLE
+                    border.isVisible = true
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
@@ -354,7 +357,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     resetHideTimer()
-                    border.visibility = View.GONE
+                    border.isVisible = false
                     if (event.action == MotionEvent.ACTION_UP) {
                         val moveX = event.rawX - initialTouchX
                         val moveY = event.rawY - initialTouchY
@@ -377,7 +380,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     initialHeight = params.height
                     initialTouchX = event.rawX
                     initialTouchY = event.rawY
-                    border.visibility = View.VISIBLE
+                    border.isVisible = true
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
@@ -391,7 +394,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     resetHideTimer()
-                    border.visibility = View.GONE
+                    border.isVisible = false
                     if (event.action == MotionEvent.ACTION_UP) {
                         val moveX = event.rawX - initialTouchX
                         val moveY = event.rawY - initialTouchY
@@ -412,6 +415,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         if (::floatingView.isInitialized) {
             windowManager.removeView(floatingView)
         }
+        chatManager.release()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -432,7 +436,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     private fun toggleFloatingView() {
         if (!::floatingView.isInitialized) return
-        if (floatingView.visibility == View.VISIBLE) {
+        if (floatingView.isVisible) {
             hideFloatingView()
         } else {
             showFloatingView()
@@ -441,12 +445,12 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 
     private fun showFloatingView() {
         if (!::floatingView.isInitialized) return
-        floatingView.visibility = View.VISIBLE
+        floatingView.isVisible = true
     }
 
     private fun hideFloatingView() {
         if (!::floatingView.isInitialized) return
-        floatingView.visibility = View.GONE
+        floatingView.isVisible = false
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

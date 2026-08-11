@@ -10,7 +10,8 @@ data class ChatMessage(
     val badgeTags: List<String> = emptyList(),  // e.g. ["broadcaster/1", "subscriber/0", "premium/1"] or full URLs
     val youtubeEmotes: Map<String, String> = emptyMap(), // shortcut -> url
     val timestamp: Long? = null,
-    val platform: String = "twitch"
+    val platform: String = "twitch",
+    val systemMessageKey: String? = null        // Key for localization lookup
 )
 
 data class StreamInfo(

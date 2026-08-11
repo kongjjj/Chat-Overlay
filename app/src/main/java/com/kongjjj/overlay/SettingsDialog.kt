@@ -3,18 +3,23 @@ package com.kongjjj.overlay
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import kotlin.math.roundToInt
 
 @Composable
@@ -62,58 +67,85 @@ fun SettingsDialog(
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(getLabel("Settings", appLanguage)) },
-        text = {
-            SettingsContent(
-                twitchChannel = twitchChannel,
-                youtubeChannelId = youtubeChannelId,
-                chatFontSize = chatFontSize,
-                chatLineSpacing = chatLineSpacing,
-                chatEmoteSize = chatEmoteSize,
-                chatUsernameSize = chatUsernameSize,
-                animatedEmotes = animatedEmotes,
-                enable7tv = enable7tv,
-                enableBttv = enableBttv,
-                enableFfz = enableFfz,
-                backgroundColor = backgroundColor,
-                appLanguage = appLanguage,
-                showTimestamp = showTimestamp,
-                showStreamInfo = showStreamInfo,
-                textShadow = textShadow,
-                shadowRadius = shadowRadius,
-                shadowOffsetX = shadowOffsetX,
-                shadowOffsetY = shadowOffsetY,
-                ttsEnabled = ttsEnabled,
-                ttsLanguage = ttsLanguage,
-                ttsIgnoreSender = ttsIgnoreSender,
-                onSaveChannel = onSaveChannel,
-                onSaveYoutubeChannelId = onSaveYoutubeChannelId,
-                onFontSizeChange = onFontSizeChange,
-                onLineSpacingChange = onLineSpacingChange,
-                onEmoteSizeChange = onEmoteSizeChange,
-                onUsernameSizeChange = onUsernameSizeChange,
-                onAnimatedEmotesChange = onAnimatedEmotesChange,
-                onEnable7tvChange = onEnable7tvChange,
-                onEnableBttvChange = onEnableBttvChange,
-                onEnableFfzChange = onEnableFfzChange,
-                onBackgroundColorChange = onBackgroundColorChange,
-                onShowTimestampChange = onShowTimestampChange,
-                onShowStreamInfoChange = onShowStreamInfoChange,
-                onTextShadowChange = onTextShadowChange,
-                onShadowRadiusChange = onShadowRadiusChange,
-                onShadowOffsetXChange = onShadowOffsetXChange,
-                onShadowOffsetYChange = onShadowOffsetYChange,
-                onTtsEnabledChange = onTtsEnabledChange,
-                onTtsLanguageChange = onTtsLanguageChange,
-                onTtsIgnoreSenderChange = onTtsIgnoreSenderChange,
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text(getLabel("Close", appLanguage)) }
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.98f)
+                .clip(RoundedCornerShape(16.dp)),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Compact Header
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = getLabel("Settings", appLanguage),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, contentDescription = getLabel("Close", appLanguage))
+                    }
+                }
+                
+                HorizontalDivider()
+
+                // Content
+                Box(modifier = Modifier.weight(1f).padding(horizontal = 16.dp)) {
+                    SettingsContent(
+                        twitchChannel = twitchChannel,
+                        youtubeChannelId = youtubeChannelId,
+                        chatFontSize = chatFontSize,
+                        chatLineSpacing = chatLineSpacing,
+                        chatEmoteSize = chatEmoteSize,
+                        chatUsernameSize = chatUsernameSize,
+                        animatedEmotes = animatedEmotes,
+                        enable7tv = enable7tv,
+                        enableBttv = enableBttv,
+                        enableFfz = enableFfz,
+                        backgroundColor = backgroundColor,
+                        appLanguage = appLanguage,
+                        showTimestamp = showTimestamp,
+                        showStreamInfo = showStreamInfo,
+                        textShadow = textShadow,
+                        shadowRadius = shadowRadius,
+                        shadowOffsetX = shadowOffsetX,
+                        shadowOffsetY = shadowOffsetY,
+                        ttsEnabled = ttsEnabled,
+                        ttsLanguage = ttsLanguage,
+                        ttsIgnoreSender = ttsIgnoreSender,
+                        onSaveChannel = onSaveChannel,
+                        onSaveYoutubeChannelId = onSaveYoutubeChannelId,
+                        onFontSizeChange = onFontSizeChange,
+                        onLineSpacingChange = onLineSpacingChange,
+                        onEmoteSizeChange = onEmoteSizeChange,
+                        onUsernameSizeChange = onUsernameSizeChange,
+                        onAnimatedEmotesChange = onAnimatedEmotesChange,
+                        onEnable7tvChange = onEnable7tvChange,
+                        onEnableBttvChange = onEnableBttvChange,
+                        onEnableFfzChange = onEnableFfzChange,
+                        onBackgroundColorChange = onBackgroundColorChange,
+                        onShowTimestampChange = onShowTimestampChange,
+                        onShowStreamInfoChange = onShowStreamInfoChange,
+                        onTextShadowChange = onTextShadowChange,
+                        onShadowRadiusChange = onShadowRadiusChange,
+                        onShadowOffsetXChange = onShadowOffsetXChange,
+                        onShadowOffsetYChange = onShadowOffsetYChange,
+                        onTtsEnabledChange = onTtsEnabledChange,
+                        onTtsLanguageChange = onTtsLanguageChange,
+                        onTtsIgnoreSenderChange = onTtsIgnoreSenderChange,
+                    )
+                }
+            }
         }
-    )
+    }
 }
 
 @Composable
@@ -165,8 +197,10 @@ fun SettingsContent(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Twitch channel
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -459,6 +493,8 @@ fun getLabel(key: String, lang: String): String {
         "Shadow Radius" to mapOf("zh-TW" to "陰影深度", "en" to "Shadow Radius", "ja" to "影のぼかし"),
         "Shadow Offset X" to mapOf("zh-TW" to "陰影偏移 X", "en" to "Shadow Offset X", "ja" to "影のオフセット X"),
         "Shadow Offset Y" to mapOf("zh-TW" to "陰影偏移 Y", "en" to "Shadow Offset Y", "ja" to "影のオフセット Y"),
+        "reconnecting_twitch" to mapOf("zh-TW" to "正在連線Twitch聊天室", "en" to "Connecting to Twitch chat room", "ja" to "Twitchチャットルームに接続中"),
+        "reconnecting_youtube" to mapOf("zh-TW" to "正在連線YouTube聊天室", "en" to "Connecting to YouTube chat room", "ja" to "YouTubeチャットルームに接続中"),
     )
     return labels[key]?.get(lang) ?: key
 }

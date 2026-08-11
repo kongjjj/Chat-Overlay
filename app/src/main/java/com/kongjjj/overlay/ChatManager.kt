@@ -22,15 +22,16 @@ import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-class ChatManager private constructor(private val context: Context) {
+class ChatManager private constructor(context: Context) {
     private val scope = CoroutineScope(Dispatchers.Main)
     
     val twitchClient = TwitchChatClient()
     val youtubeClient = YouTubeChatClient()
     val emoteRepository = EmoteRepository()
-    val ttsManager = TtsManager(context)
+    val ttsManager = TtsManager(context.applicationContext)
     
     // Settings state
     val twitchChannel = MutableStateFlow("")
@@ -76,10 +77,10 @@ class ChatManager private constructor(private val context: Context) {
         val prefs = context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE)
         
         twitchClient.onReconnect = {
-            addSystemMessage(context.getString(R.string.reconnecting_twitch))
+            addSystemMessage(context.getString(R.string.reconnecting_twitch), "reconnecting_twitch")
         }
         youtubeClient.onReconnect = {
-            addSystemMessage(context.getString(R.string.reconnecting_youtube))
+            addSystemMessage(context.getString(R.string.reconnecting_youtube), "reconnecting_youtube")
         }
 
         twitchChannel.value = prefs.getString("twitch_channel", "") ?: ""
@@ -219,7 +220,8 @@ class ChatManager private constructor(private val context: Context) {
 
             val response = httpClient.newCall(request).execute()
             if (response.isSuccessful) {
-                val json = JSONObject(response.body?.string() ?: "{}")
+                val body = response.body.string()
+                val json = JSONObject(body.ifBlank { "{}" })
                 val data = json.optJSONObject("data")
                 val user = data?.optJSONObject("user")
                 val stream = user?.optJSONObject("stream")
@@ -280,36 +282,41 @@ class ChatManager private constructor(private val context: Context) {
         ttsManager.setLanguage(locale)
     }
 
-    fun addSystemMessage(text: String) {
-        // Check if message with same text already exists to avoid duplicates
-        if (_systemMessages.value.any { it.message == text }) return
+    fun addSystemMessage(text: String, key: String? = null) {
+        // Check if message with same text or key already exists to avoid duplicates
+        if (key != null) {
+            if (_systemMessages.value.any { it.systemMessageKey == key }) return
+        } else {
+            if (_systemMessages.value.any { it.message == text }) return
+        }
 
         val message = ChatMessage(
             id = java.util.UUID.randomUUID().toString(),
             username = "System",
             message = text,
             platform = "system",
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
+            systemMessageKey = key
         )
         // Add to system messages
         _systemMessages.value = (_systemMessages.value + message).takeLast(5)
         
         // Auto-remove after 7 seconds
         scope.launch {
-            delay(7_000)
+            delay(7000.milliseconds)
             _systemMessages.value = _systemMessages.value.filter { it.id != message.id }
         }
     }
 
-    fun connect() {
+    fun connect(context: Context) {
         if (twitchChannel.value.isNotEmpty()) {
-            addSystemMessage(context.getString(R.string.reconnecting_twitch))
+            addSystemMessage(context.getString(R.string.reconnecting_twitch), "reconnecting_twitch")
             twitchClient.connect(twitchChannel.value)
         } else {
             twitchClient.disconnect()
         }
         if (youtubeChannelId.value.isNotEmpty()) {
-            addSystemMessage(context.getString(R.string.reconnecting_youtube))
+            addSystemMessage(context.getString(R.string.reconnecting_youtube), "reconnecting_youtube")
             youtubeClient.connect(youtubeChannelId.value)
         } else {
             youtubeClient.disconnect()
@@ -447,6 +454,12 @@ class ChatManager private constructor(private val context: Context) {
         val imageLoader = coil.Coil.imageLoader(context)
         imageLoader.diskCache?.clear()
         imageLoader.memoryCache?.clear()
+    }
+
+    fun release() {
+        stopStreamInfoUpdates()
+        ttsManager.release()
+        INSTANCE = null
     }
 
     companion object {

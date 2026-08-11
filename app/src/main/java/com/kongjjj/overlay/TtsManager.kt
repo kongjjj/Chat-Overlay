@@ -5,7 +5,7 @@ import android.speech.tts.TextToSpeech
 import java.util.*
 
 class TtsManager(context: Context) : TextToSpeech.OnInitListener {
-    private var tts: TextToSpeech? = TextToSpeech(context, this)
+    private var tts: TextToSpeech? = TextToSpeech(context.applicationContext, this)
     private var isInitialized = false
     private var pendingLanguage: Locale? = null
 
@@ -28,5 +28,11 @@ class TtsManager(context: Context) : TextToSpeech.OnInitListener {
         if (isInitialized) {
             tts?.speak(text, TextToSpeech.QUEUE_ADD, null, null)
         }
+    }
+
+    fun release() {
+        tts?.stop()
+        tts?.shutdown()
+        tts = null
     }
 }
