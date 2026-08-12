@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
                 val ttsEnabled by chatManager.ttsEnabled.collectAsState()
                 val ttsLanguage by chatManager.ttsLanguage.collectAsState()
                 val ttsIgnoreSender by chatManager.ttsIgnoreSender.collectAsState()
+                val ttsIgnoreEmoji by chatManager.ttsIgnoreEmoji.collectAsState()
 
                 val context = LocalContext.current
                 val packageInfo = remember {
@@ -180,6 +181,7 @@ class MainActivity : ComponentActivity() {
                             ttsEnabled = ttsEnabled,
                             ttsLanguage = ttsLanguage,
                             ttsIgnoreSender = ttsIgnoreSender,
+                            ttsIgnoreEmoji = ttsIgnoreEmoji,
                             onSaveChannel = { chatManager.saveTwitchChannel(it, this@MainActivity) },
                             onSaveYoutubeChannelId = { chatManager.saveYoutubeChannelId(it, this@MainActivity) },
                             onFontSizeChange = { chatManager.saveFontSize(it, this@MainActivity) },
@@ -200,6 +202,7 @@ class MainActivity : ComponentActivity() {
                             onTtsEnabledChange = { chatManager.saveTtsEnabled(it, this@MainActivity) },
                             onTtsLanguageChange = { chatManager.saveTtsLanguage(it, this@MainActivity) },
                             onTtsIgnoreSenderChange = { chatManager.saveTtsIgnoreSender(it, this@MainActivity) },
+                            onTtsIgnoreEmojiChange = { chatManager.saveTtsIgnoreEmoji(it, this@MainActivity) },
                         ) {
                             showSettings = false
                         }

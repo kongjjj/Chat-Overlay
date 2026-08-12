@@ -68,6 +68,7 @@ class ChatManager private constructor(context: Context) {
     // TTS Settings
     val ttsEnabled = MutableStateFlow(false)
     val ttsIgnoreSender = MutableStateFlow(false)
+    val ttsIgnoreEmoji = MutableStateFlow(false)
     val ttsLanguage = MutableStateFlow("zh-HK") // Default to Cantonese
 
     private val spokenMessageIds = mutableSetOf<String>()
@@ -104,6 +105,7 @@ class ChatManager private constructor(context: Context) {
         
         ttsEnabled.value = prefs.getBoolean("tts_enabled", false)
         ttsIgnoreSender.value = prefs.getBoolean("tts_ignore_sender", false)
+        ttsIgnoreEmoji.value = prefs.getBoolean("tts_ignore_emoji", false)
         ttsLanguage.value = prefs.getString("tts_language", "zh-HK") ?: "zh-HK"
 
         // Set initial TTS language
@@ -258,10 +260,30 @@ class ChatManager private constructor(context: Context) {
             spokenMessageIds.removeAll(toRemove.toSet())
         }
 
+        var messageContent = message.message
+        
+        // Filter out emojis and emotes if enabled
+        if (ttsIgnoreEmoji.value) {
+            val segments = parseMessageSegments(
+                message = message.message,
+                emotesTag = message.emotesTag,
+                thirdPartyEmotes = emoteRepository.thirdPartyEmotes.value,
+                youtubeEmotes = message.youtubeEmotes
+            )
+            
+            val emojiRegex = Regex("[\\uD83C-\\uDBFF\\uDC00-\\uDFFF]|\\p{So}")
+            
+            messageContent = segments.filterIsInstance<MessageSegment.TextPart>()
+                .joinToString(" ") { it.text.replace(emojiRegex, "") }
+                .trim()
+        }
+
+        if (messageContent.isBlank()) return
+
         val textToSpeak = if (ttsIgnoreSender.value) {
-            message.message
+            messageContent
         } else {
-            "${message.username}說: ${message.message}"
+            "${message.username}說: $messageContent"
         }
         
         // Clean up message for TTS (simple link replacement)
@@ -440,6 +462,11 @@ class ChatManager private constructor(context: Context) {
     fun saveTtsIgnoreSender(ignore: Boolean, context: Context) {
         ttsIgnoreSender.value = ignore
         context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("tts_ignore_sender", ignore) }
+    }
+
+    fun saveTtsIgnoreEmoji(enabled: Boolean, context: Context) {
+        ttsIgnoreEmoji.value = enabled
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("tts_ignore_emoji", enabled) }
     }
     
     private suspend fun reloadEmotes() {
