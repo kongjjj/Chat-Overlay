@@ -25,6 +25,7 @@ import com.kongjjj.overlay.ui.theme.ChatOverlayTheme
 
 class MainActivity : ComponentActivity() {
 
+    private var _showSettings = mutableStateOf(false)
     private val overlayPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) {
@@ -38,10 +39,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        
+
+        handleIntent(intent)
+
         setContent {
             ChatOverlayTheme {
-                var showSettings by remember { mutableStateOf(value = false) }
+                var showSettings by _showSettings
                 var showLanguageDialog by remember { mutableStateOf(value = false) }
                 val chatManager = remember { ChatManager.getInstance(applicationContext) }
                 
@@ -213,6 +216,16 @@ class MainActivity : ComponentActivity() {
 
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.getBooleanExtra("SHOW_SETTINGS", false) == true) {
+            _showSettings.value = true
+        }
+    }
     private fun checkPermissionAndStart() {
         if (!Settings.canDrawOverlays(this)) {
             val intent = Intent(

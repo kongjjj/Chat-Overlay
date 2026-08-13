@@ -162,6 +162,14 @@ class EmoteRepository {
             "staff/1"       to url("d97c37be-57b3-4f3d-b8db-6dcb904f84c8"),
             "subscriber/0"  to url("5d9f2208-5dd8-11e7-8513-2ff4adfae661"),
             "turbo/1"       to url("bd444ec6-8f34-4bf9-91f4-af1e3428d80f"),
+            "lead_moderator/1"  to url("0822047b-65e0-46f2-94a9-d1091d685d33"),
+            "artist-badge/1"  to url("4300a897-03dc-4e83-8c0e-c332fee7057f"),
+            "went-outside/1"  to url("544b6594-e11e-4230-8d42-d81c84002524"),
+            "bot-badge/1"   to url("3ffa9565-c35b-4cad-800b-041e60659cf2"),
+            "nasa-artemis-ii/1"  to url("52f0ea34-b35a-4bab-97a0-c7d354a27268"),
+            "founder/1"     to url("511b78a9-ab37-472f-9569-457753bbe7d3"),
+            "no_audio/1"    to url("aef2cd08-f29b-45a1-8c12-d44d7fd5e6f0"),
+            "no_video/1"    to url("199a0dba-58f3-494e-a7fc-1fa0a1001fb8"),
             "vip/1"         to url("b817aba4-fad8-49e2-b88a-7cc744dfa6ec"),
         )
     }
