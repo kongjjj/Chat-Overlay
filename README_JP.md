@@ -1,4 +1,4 @@
-
+**日本語** | [English](README_EN.md) | [繁體中文](README.md)
 <div align="center">
 <img src="pics/Logo.png" width="108" height="108" alt="Chat Overlay">
 
@@ -13,7 +13,7 @@ Android向けの透明なYouTube/Twitchチャットオーバーレイ、ライ�
 [![Release](https://img.shields.io/github/release/kongjjj/Chat-Overlay?color=0000FF&label=Release&style=for-the-badge)](https://github.com/kongjjj/Chat-Overlay/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/kongjjj/Chat-Overlay/total?label=Downloads&style=for-the-badge&color=lightgreen)](https://github.com/kongjjj/Chat-Overlay/releases)
 
-**日本語** | [English](README_EN.md) | [繁體中文](README.md)
+
 </div>
 
 ---
