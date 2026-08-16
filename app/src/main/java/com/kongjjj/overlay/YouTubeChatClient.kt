@@ -137,12 +137,75 @@ class YouTubeChatClient {
             val html = response.body.string()
 
             apiKey = Regex("\"INNERTUBE_API_KEY\":\"([^\"]+)\"").find(html)?.groupValues?.get(1)
-            continuation = Regex("\"continuation\":\"([^\"]+)\"").find(html)?.groupValues?.get(1)
+            
+            // Try to extract the "Live Chat" continuation token from ytInitialData first
+            continuation = extractLiveChatContinuation(html)
+            
+            // Fallback to simple regex if extraction fails
+            if (continuation == null) {
+                continuation = Regex("\"continuation\":\"([^\"]+)\"").find(html)?.groupValues?.get(1)
+            }
 
             apiKey != null && continuation != null
         } catch (e: Exception) {
             Log.e(tag, "Error fetching initial page", e)
             false
+        }
+    }
+
+    private fun extractLiveChatContinuation(html: String): String? {
+        return try {
+            // Find ytInitialData block
+            val startMarker = "window[\"ytInitialData\"] ="
+            var startPos = html.indexOf(startMarker)
+            if (startPos == -1) {
+                val altStartMarker = "var ytInitialData ="
+                startPos = html.indexOf(altStartMarker)
+                if (startPos == -1) return null
+                startPos += altStartMarker.length
+            } else {
+                startPos += startMarker.length
+            }
+
+            val endPos = html.indexOf(";</script>", startPos)
+            if (endPos == -1) return null
+
+            val jsonString = html.substring(startPos, endPos).trim()
+            val json = JSONObject(jsonString)
+
+            // Path for live_chat popout page
+            val continuationContents = json.optJSONObject("continuationContents")
+            val liveChatContinuation = continuationContents?.optJSONObject("liveChatContinuation")
+
+            val header = liveChatContinuation?.optJSONObject("header")
+                ?: json.optJSONObject("contents")?.optJSONObject("liveChatRenderer")?.optJSONObject("header")
+
+            val subMenuItems = header?.optJSONObject("liveChatHeaderRenderer")
+                ?.optJSONObject("viewSelector")
+                ?.optJSONObject("sortFilterSubMenuRenderer")
+                ?.optJSONArray("subMenuItems")
+
+            if (subMenuItems != null) {
+                for (i in 0 until subMenuItems.length()) {
+                    val item = subMenuItems.getJSONObject(i)
+                    val title = item.optString("title")
+                    val selected = item.optBoolean("selected", false)
+
+                    // We want "Live Chat" (Unfiltered). Usually index 1.
+                    // If selected is true, it's the current view (likely Top Chat).
+                    // We look for one that is NOT selected or specifically titled "Live chat"
+                    if (title.contains("Live chat", ignoreCase = true) || !selected) {
+                        val token = item.optJSONObject("continuation")
+                            ?.optJSONObject("reloadContinuationData")
+                            ?.optString("continuation")
+                        if (token != null) return token
+                    }
+                }
+            }
+            null
+        } catch (e: Exception) {
+            Log.e(tag, "Error extracting Live Chat continuation", e)
+            null
         }
     }
 

@@ -46,6 +46,7 @@ fun SettingsDialog(
     ttsLanguage: String,
     ttsIgnoreSender: Boolean,
     ttsIgnoreEmoji: Boolean,
+    ttsIgnoreLinks: Boolean,
     onSaveChannel: (String) -> Unit,
     onSaveYoutubeChannelId: (String) -> Unit,
     onFontSizeChange: (Float) -> Unit,
@@ -67,6 +68,7 @@ fun SettingsDialog(
     onTtsLanguageChange: (String) -> Unit,
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
     onTtsIgnoreEmojiChange: (Boolean) -> Unit,
+    onTtsIgnoreLinksChange: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -124,6 +126,7 @@ fun SettingsDialog(
                         ttsLanguage = ttsLanguage,
                         ttsIgnoreSender = ttsIgnoreSender,
                         ttsIgnoreEmoji = ttsIgnoreEmoji,
+                        ttsIgnoreLinks = ttsIgnoreLinks,
                         onSaveChannel = onSaveChannel,
                         onSaveYoutubeChannelId = onSaveYoutubeChannelId,
                         onFontSizeChange = onFontSizeChange,
@@ -145,6 +148,7 @@ fun SettingsDialog(
                         onTtsLanguageChange = onTtsLanguageChange,
                         onTtsIgnoreSenderChange = onTtsIgnoreSenderChange,
                         onTtsIgnoreEmojiChange = onTtsIgnoreEmojiChange,
+                        onTtsIgnoreLinksChange = onTtsIgnoreLinksChange,
                     )
                 }
             }
@@ -176,6 +180,7 @@ fun SettingsContent(
     ttsLanguage: String,
     ttsIgnoreSender: Boolean,
     ttsIgnoreEmoji: Boolean,
+    ttsIgnoreLinks: Boolean,
     onSaveChannel: (String) -> Unit,
     onSaveYoutubeChannelId: (String) -> Unit,
     onFontSizeChange: (Float) -> Unit,
@@ -197,6 +202,7 @@ fun SettingsContent(
     onTtsLanguageChange: (String) -> Unit,
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
     onTtsIgnoreEmojiChange: (Boolean) -> Unit,
+    onTtsIgnoreLinksChange: (Boolean) -> Unit,
 ) {
     var channelInput by remember(twitchChannel) { mutableStateOf(twitchChannel) }
     var youtubeInput by remember(youtubeChannelId) { mutableStateOf(youtubeChannelId) }
@@ -386,6 +392,11 @@ fun SettingsContent(
                     Text(getLabel("Ignore Emoji", appLanguage), style = MaterialTheme.typography.bodyMedium)
                     Switch(checked = ttsIgnoreEmoji, onCheckedChange = onTtsIgnoreEmojiChange)
                 }
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(getLabel("Ignore Links", appLanguage), style = MaterialTheme.typography.bodyMedium)
+                    Switch(checked = ttsIgnoreLinks, onCheckedChange = onTtsIgnoreLinksChange)
+                }
             }
         }
 
@@ -490,6 +501,7 @@ fun getLabel(key: String, lang: String): String {
         "TTS Language" to mapOf("zh-TW" to "朗讀語系", "en" to "TTS Language", "ja" to "TTS言語"),
         "Ignore Sender" to mapOf("zh-TW" to "忽略使用者名稱", "en" to "Ignore Sender", "ja" to "送信者を無視"),
         "Ignore Emoji" to mapOf("zh-TW" to "忽略 Emoji 朗讀", "en" to "Ignore Emoji", "ja" to "絵文字を無視"),
+        "Ignore Links" to mapOf("zh-TW" to "忽略超連結", "en" to "Ignore Links", "ja" to "リンクを無視"),
         "Font Size" to mapOf("zh-TW" to "字型大小", "en" to "Font Size", "ja" to "フォントサイズ"),
         "Username Size" to mapOf("zh-TW" to "使用者名稱大小", "en" to "Username Size", "ja" to "ユーザー名サイズ"),
         "Line Spacing" to mapOf("zh-TW" to "行距", "en" to "Line Spacing", "ja" to "行間"),

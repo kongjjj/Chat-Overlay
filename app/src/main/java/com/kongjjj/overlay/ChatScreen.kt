@@ -25,6 +25,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +33,8 @@ import androidx.core.graphics.toColorInt
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
+
+val TiffanyBlue = Color(0xFF0ABAB5)
 
 @Composable
 fun ChatScreen(
@@ -434,7 +437,11 @@ private fun ChatMessageRow(
                     when (seg) {
                         is MessageSegment.TextPart -> append(seg.text)
                         is MessageSegment.EmotePart -> appendInlineContent(seg.url, "[${seg.name}]")
-                        is MessageSegment.LinkPart -> append(seg.text)
+                        is MessageSegment.LinkPart -> {
+                            withStyle(SpanStyle(color = TiffanyBlue, textDecoration = TextDecoration.Underline)) {
+                                append(seg.text)
+                            }
+                        }
                     }
                 }
             }

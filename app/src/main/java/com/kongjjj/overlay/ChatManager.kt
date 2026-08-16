@@ -69,9 +69,11 @@ class ChatManager private constructor(context: Context) {
     val ttsEnabled = MutableStateFlow(false)
     val ttsIgnoreSender = MutableStateFlow(false)
     val ttsIgnoreEmoji = MutableStateFlow(false)
+    val ttsIgnoreLinks = MutableStateFlow(false)
     val ttsLanguage = MutableStateFlow("zh-HK") // Default to Cantonese
 
     private val spokenMessageIds = mutableSetOf<String>()
+    private var initializationTime = System.currentTimeMillis()
 
     init {
         // Load settings from SharedPreferences
@@ -106,6 +108,7 @@ class ChatManager private constructor(context: Context) {
         ttsEnabled.value = prefs.getBoolean("tts_enabled", false)
         ttsIgnoreSender.value = prefs.getBoolean("tts_ignore_sender", false)
         ttsIgnoreEmoji.value = prefs.getBoolean("tts_ignore_emoji", false)
+        ttsIgnoreLinks.value = prefs.getBoolean("tts_ignore_links", false)
         ttsLanguage.value = prefs.getString("tts_language", "zh-HK") ?: "zh-HK"
 
         // Set initial TTS language
@@ -252,6 +255,10 @@ class ChatManager private constructor(context: Context) {
     private fun speakMessage(message: ChatMessage) {
         if (message.id == "system_instruction") return
         if (spokenMessageIds.contains(message.id)) return
+
+        // Ignore messages that arrived before we started listening (history)
+        val msgTimestamp = message.timestamp ?: System.currentTimeMillis()
+        if (msgTimestamp < initializationTime) return
         
         spokenMessageIds.add(message.id)
         if (spokenMessageIds.size > 200) {
@@ -280,6 +287,12 @@ class ChatManager private constructor(context: Context) {
 
         if (messageContent.isBlank()) return
 
+        if (ttsIgnoreLinks.value) {
+            messageContent = messageContent.replace(Regex("https?://\\S+"), "").trim()
+        }
+
+        if (messageContent.isBlank()) return
+
         val textToSpeak = if (ttsIgnoreSender.value) {
             messageContent
         } else {
@@ -287,7 +300,11 @@ class ChatManager private constructor(context: Context) {
         }
         
         // Clean up message for TTS (simple link replacement)
-        val cleanedText = textToSpeak.replace(Regex("https?://\\S+"), "連結")
+        val cleanedText = if (ttsIgnoreLinks.value) {
+            textToSpeak
+        } else {
+            textToSpeak.replace(Regex("https?://\\S+"), "連結")
+        }
         
         ttsManager.speak(cleanedText)
     }
@@ -468,6 +485,11 @@ class ChatManager private constructor(context: Context) {
         ttsIgnoreEmoji.value = enabled
         context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("tts_ignore_emoji", enabled) }
     }
+
+    fun saveTtsIgnoreLinks(enabled: Boolean, context: Context) {
+        ttsIgnoreLinks.value = enabled
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("tts_ignore_links", enabled) }
+    }
     
     private suspend fun reloadEmotes() {
         emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value)
@@ -486,6 +508,8 @@ class ChatManager private constructor(context: Context) {
     fun release() {
         stopStreamInfoUpdates()
         ttsManager.release()
+        twitchClient.clearMessages()
+        youtubeClient.clearMessages()
         INSTANCE = null
     }
 

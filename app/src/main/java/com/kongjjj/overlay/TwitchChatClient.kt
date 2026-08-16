@@ -144,7 +144,7 @@ class TwitchChatClient {
             var msgId: String? = null
             var serverTimestamp: Long? = null
 
-            // Strip IRCv3 tags: @key=value;key=value ... <space> rest-of-line
+            // 1. Strip IRCv3 tags: @key=value;key=value ... <space> rest-of-line
             if (rest.startsWith("@")) {
                 val spaceIdx = rest.indexOf(' ')
                 if (spaceIdx < 0) return null
@@ -167,15 +167,42 @@ class TwitchChatClient {
                 }
             }
 
-            // rest: :nick!user@host PRIVMSG #channel :message text
-            val prefix   = rest.removePrefix(":").substringBefore("!")
-            val login    = prefix.ifEmpty { null }
+            // 2. Extract Prefix: :nick!user@host <space> rest
+            var prefix: String? = null
+            if (rest.startsWith(":")) {
+                val spaceIdx = rest.indexOf(' ')
+                if (spaceIdx > 0) {
+                    prefix = rest.substring(1, spaceIdx)
+                    rest = rest.substring(spaceIdx + 1).trimStart()
+                }
+            }
+
+            val login = prefix?.substringBefore("!")
             val username = displayName ?: login ?: return null
 
-            // Message starts after the second ':'
-            val msgIdx = rest.indexOf(':', 1)
-            if (msgIdx < 0) return null
-            val message = rest.substring(msgIdx + 1)
+            // 3. Extract Command and Parameters
+            val firstSpace = rest.indexOf(' ')
+            if (firstSpace < 0) return null
+            val command = rest.substring(0, firstSpace)
+            if (command != "PRIVMSG") return null
+
+            val paramsPart = rest.substring(firstSpace + 1).trimStart()
+            // paramsPart looks like: #channel :message text OR #channel message
+
+            // 4. Extract Message (the trailing parameter)
+            val message = when {
+                paramsPart.contains(" :") -> {
+                    paramsPart.substring(paramsPart.indexOf(" :") + 2)
+                }
+                paramsPart.startsWith(":") -> {
+                    paramsPart.substring(1)
+                }
+                paramsPart.indexOf(' ') >= 0 -> {
+                    paramsPart.substring(paramsPart.indexOf(' ') + 1)
+                }
+                else -> return null // Should have at least channel and message
+            }
+
             if (message.isBlank()) return null
 
             val badges = badgesStr?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
