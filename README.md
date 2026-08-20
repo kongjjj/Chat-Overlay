@@ -8,7 +8,7 @@
 <br><br>
 [![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)](https://twitch.tv)
 [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
-[![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) alt="支持平台"](https://github.com/kongjjj/Chat-Overlay)
+[![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) alt="支持平台](https://github.com/kongjjj/Chat-Overlay)
 ![GitHub top language](https://img.shields.io/github/languages/top/kongjjj/Chat-Overlay?&style=for-the-badge)
 [![Release](https://img.shields.io/github/release/kongjjj/Chat-Overlay?color=0000FF&label=Release&style=for-the-badge)](https://github.com/kongjjj/Chat-Overlay/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/kongjjj/Chat-Overlay/total?label=Downloads&style=for-the-badge&color=lightgreen)](https://github.com/kongjjj/Chat-Overlay/releases)
