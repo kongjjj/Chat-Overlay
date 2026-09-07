@@ -339,8 +339,23 @@ private fun ChatMessageRow(
         }.filter { it.isNotEmpty() }
     }
 
+    val announcementBg = remember(message.isAnnouncement, message.announcementColor) {
+        if (message.isAnnouncement) {
+            val baseColor = when (message.announcementColor?.uppercase()) {
+                "BLUE" -> Color(0xFF00E5FF)
+                "GREEN" -> Color(0xFF00FF7F)
+                "ORANGE" -> Color(0xFFFF8200)
+                "PURPLE" -> Color(0xFF9146FF)
+                else -> Color(0xFF9146FF) // PRIMARY
+            }
+            baseColor.copy(alpha = 0.25f)
+        } else {
+            Color.Transparent
+        }
+    }
+
     val segments: List<MessageSegment> = remember(message.id, thirdPartyEmotes.size) {
-        parseMessageSegments(message.message, message.emotesTag, thirdPartyEmotes, message.youtubeEmotes)
+        parseMessageSegments(message.message, message.emotesTag, thirdPartyEmotes, message.youtubeEmotes, message.bits > 0)
     }
 
     val timestampText = remember(message.timestamp, showTimestamp) {
@@ -371,13 +386,20 @@ private fun ChatMessageRow(
                         imageLoader = imageLoader, modifier = Modifier.fillMaxSize())
                 })
             }
-            segments.filterIsInstance<MessageSegment.EmotePart>()
-                .distinctBy { it.url }
-                .forEach { emote ->
-                    put(emote.url, InlineTextContent(
+            segments.filter { it is MessageSegment.EmotePart || it is MessageSegment.BitsPart }
+                .mapNotNull { 
+                    when(it) {
+                        is MessageSegment.EmotePart -> it.url to it.name
+                        is MessageSegment.BitsPart -> it.url to "bits"
+                        else -> null
+                    }
+                }
+                .distinctBy { it.first }
+                .forEach { (url, name) ->
+                    put(url, InlineTextContent(
                         Placeholder(emoteSizeSp, emoteSizeSp, PlaceholderVerticalAlign.TextCenter)
                     ) {
-                        AsyncImage(model = emote.url, contentDescription = emote.name,
+                        AsyncImage(model = url, contentDescription = name,
                             imageLoader = imageLoader, modifier = Modifier.fillMaxSize())
                     })
                 }
@@ -403,43 +425,62 @@ private fun ChatMessageRow(
                     append(systemText)
                 }
             } else {
-                if (message.platform == "youtube" || message.platform == "twitch") {
-                    appendInlineContent("platform_icon", "[${message.platform}]")
-                    append(' ')
-                }
-
-                // Twitch: badges BEFORE name
-                if (message.platform == "twitch") {
-                    badgeUrls.forEachIndexed { i, url ->
-                        appendInlineContent(url, "[badge]")
-                        if (i < badgeUrls.lastIndex) append('\u2009') else append(' ')
+                // Show System Message first (e.g. for Twitch USERNOTICE)
+                if (!message.rawSystemMessage.isNullOrEmpty()) {
+                    withStyle(SpanStyle(color = Color.White.copy(alpha = 0.9f), fontWeight = FontWeight.Normal)) {
+                        append(message.rawSystemMessage)
+                    }
+                    if (message.message.isNotEmpty()) {
+                        append("\n")
                     }
                 }
 
-                withStyle(SpanStyle(color = nameColor, fontWeight = FontWeight.SemiBold, fontSize = usernameSize.sp)) {
-                    append(message.username)
-                    if (message.login != null && !message.login.equals(message.username, ignoreCase = true)) {
-                        append(" (${message.login})")
+                // Show the standard "User: Message" part
+                if (message.message.isNotEmpty() || message.rawSystemMessage.isNullOrEmpty()) {
+                    if (message.platform == "youtube" || message.platform == "twitch") {
+                        appendInlineContent("platform_icon", "[${message.platform}]")
+                        append(' ')
                     }
-                }
 
-                // YouTube: badges AFTER name
-                if (message.platform == "youtube") {
-                    badgeUrls.forEachIndexed { i, url ->
-                        if (i == 0) append(' ')
-                        appendInlineContent(url, "[badge]")
-                        if (i < badgeUrls.lastIndex) append('\u2009')
+                    // Twitch: badges BEFORE name
+                    if (message.platform == "twitch") {
+                        badgeUrls.forEachIndexed { i, url ->
+                            appendInlineContent(url, "[badge]")
+                            if (i < badgeUrls.lastIndex) append('\u2009') else append(' ')
+                        }
                     }
-                }
 
-                append(": ")
-                segments.forEach { seg ->
-                    when (seg) {
-                        is MessageSegment.TextPart -> append(seg.text)
-                        is MessageSegment.EmotePart -> appendInlineContent(seg.url, "[${seg.name}]")
-                        is MessageSegment.LinkPart -> {
-                            withStyle(SpanStyle(color = TiffanyBlue, textDecoration = TextDecoration.Underline)) {
-                                append(seg.text)
+                    withStyle(SpanStyle(color = nameColor, fontWeight = FontWeight.SemiBold, fontSize = usernameSize.sp)) {
+                        append(message.username)
+                        if (message.login != null && !message.login.equals(message.username, ignoreCase = true)) {
+                            append(" (${message.login})")
+                        }
+                    }
+
+                    // YouTube: badges AFTER name
+                    if (message.platform == "youtube") {
+                        badgeUrls.forEachIndexed { i, url ->
+                            if (i == 0) append(' ')
+                            appendInlineContent(url, "[badge]")
+                            if (i < badgeUrls.lastIndex) append('\u2009')
+                        }
+                    }
+
+                    append(": ")
+                    segments.forEach { seg ->
+                        when (seg) {
+                            is MessageSegment.TextPart -> append(seg.text)
+                            is MessageSegment.EmotePart -> appendInlineContent(seg.url, "[${seg.name}]")
+                            is MessageSegment.BitsPart -> {
+                                appendInlineContent(seg.url, "[bits]")
+                                withStyle(SpanStyle(color = Color(0xFFBF94FF), fontWeight = FontWeight.Bold)) {
+                                    append(" ${seg.amount}")
+                                }
+                            }
+                            is MessageSegment.LinkPart -> {
+                                withStyle(SpanStyle(color = TiffanyBlue, textDecoration = TextDecoration.Underline)) {
+                                    append(seg.text)
+                                }
                             }
                         }
                     }
@@ -464,6 +505,7 @@ private fun ChatMessageRow(
         ),
         modifier = Modifier
             .fillMaxWidth()
+            .background(announcementBg)
             .padding(horizontal = 12.dp, vertical = 2.dp)
     )
 }

@@ -181,7 +181,8 @@ fun parseMessageSegments(
     message:          String,
     emotesTag:        String?,
     thirdPartyEmotes: Map<String, String>,
-    youtubeEmotes:    Map<String, String> = emptyMap()
+    youtubeEmotes:    Map<String, String> = emptyMap(),
+    hasBits:          Boolean = false
 ): List<MessageSegment> {
     
     val twitchRanges = mutableListOf<Triple<Int, Int, String>>()
@@ -229,10 +230,52 @@ fun parseMessageSegments(
         else listOf(seg)
     }
 
-    return stage3.flatMap { seg ->
+    val stage4 = if (hasBits) {
+        stage3.flatMap { seg ->
+            if (seg is MessageSegment.TextPart) scanForBits(seg.text)
+            else listOf(seg)
+        }
+    } else {
+        stage3
+    }
+
+    return stage4.flatMap { seg ->
         if (seg is MessageSegment.TextPart) scanForLinks(seg.text)
         else listOf(seg)
     }
+}
+
+private fun scanForBits(text: String): List<MessageSegment> {
+    val result = mutableListOf<MessageSegment>()
+    var cursor = 0
+    val bitsRegex = Regex("\\bcheer(\\d+)\\b", RegexOption.IGNORE_CASE)
+    
+    bitsRegex.findAll(text).forEach { match ->
+        if (match.range.first > cursor) {
+            result.add(MessageSegment.TextPart(text.substring(cursor, match.range.first)))
+        }
+        
+        val amount = match.groupValues[1].toIntOrNull() ?: 1
+        val color = when {
+            amount >= 10000 -> "red"
+            amount >= 5000  -> "blue"
+            amount >= 1000  -> "green"
+            amount >= 100   -> "purple"
+            else            -> "grey"
+        }
+        // Force purple if the user wants it, but let's try to be accurate to tiers first.
+        // Actually, the user specifically said "cheer 用紫色動畫bits圖案". I will prioritize purple.
+        val finalColor = if (amount >= 1) "purple" else color 
+        
+        val url = "https://static-cdn.jtvnw.net/bits/dark/animated/$finalColor/1"
+        result.add(MessageSegment.BitsPart(amount, url))
+        cursor = match.range.last + 1
+    }
+    
+    if (cursor < text.length) {
+        result.add(MessageSegment.TextPart(text.substring(cursor)))
+    }
+    return result
 }
 
 private fun scanWords(text: String, emotes: Map<String, String>, useStrictBoundaries: Boolean): List<MessageSegment> {

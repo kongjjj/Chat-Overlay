@@ -119,7 +119,7 @@ class TwitchChatClient {
             return
         }
 
-        if (!line.contains("PRIVMSG")) return
+        if (!line.contains("PRIVMSG") && !line.contains("USERNOTICE")) return
 
         val msg = parseTwitchIrcLine(line)
         if (msg != null) {
@@ -143,6 +143,10 @@ class TwitchChatClient {
             var badgesStr: String? = null
             var msgId: String? = null
             var serverTimestamp: Long? = null
+            var twitchMsgId: String? = null
+            var systemMsg: String? = null
+            var msgParamColor: String? = null
+            var bits = 0
 
             // 1. Strip IRCv3 tags: @key=value;key=value ... <space> rest-of-line
             if (rest.startsWith("@")) {
@@ -163,6 +167,10 @@ class TwitchChatClient {
                         "badges"          -> if (value.isNotEmpty()) badgesStr = value
                         "id"              -> if (value.isNotEmpty()) msgId = value
                         "tmi-sent-ts"     -> serverTimestamp = value.toLongOrNull()
+                        "msg-id"          -> if (value.isNotEmpty()) twitchMsgId = value
+                        "system-msg"      -> if (value.isNotEmpty()) systemMsg = value.replace("\\s", " ")
+                        "msg-param-color" -> if (value.isNotEmpty()) msgParamColor = value
+                        "bits"            -> bits = value.toIntOrNull() ?: 0
                     }
                 }
             }
@@ -184,7 +192,7 @@ class TwitchChatClient {
             val firstSpace = rest.indexOf(' ')
             if (firstSpace < 0) return null
             val command = rest.substring(0, firstSpace)
-            if (command != "PRIVMSG") return null
+            if (command != "PRIVMSG" && command != "USERNOTICE") return null
 
             val paramsPart = rest.substring(firstSpace + 1).trimStart()
             // paramsPart looks like: #channel :message text OR #channel message
@@ -200,10 +208,10 @@ class TwitchChatClient {
                 paramsPart.indexOf(' ') >= 0 -> {
                     paramsPart.substring(paramsPart.indexOf(' ') + 1)
                 }
-                else -> return null // Should have at least channel and message
+                else -> "" // User message is optional in USERNOTICE
             }
 
-            if (message.isBlank()) return null
+            if (message.isEmpty() && systemMsg.isNullOrEmpty()) return null
 
             val badges = badgesStr?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
 
@@ -217,6 +225,10 @@ class TwitchChatClient {
                 badgeTags  = badges,
                 timestamp  = serverTimestamp,
                 platform   = "twitch",
+                rawSystemMessage = systemMsg,
+                isAnnouncement = (command == "USERNOTICE" || twitchMsgId == "announcement" || bits > 0),
+                announcementColor = msgParamColor,
+                bits = bits
             )
         } catch (_: Exception) {
             return null

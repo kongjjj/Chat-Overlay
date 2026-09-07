@@ -11,7 +11,11 @@ data class ChatMessage(
     val youtubeEmotes: Map<String, String> = emptyMap(), // shortcut -> url
     val timestamp: Long? = null,
     val platform: String = "twitch",
-    val systemMessageKey: String? = null        // Key for localization lookup
+    val systemMessageKey: String? = null,       // Key for localization lookup
+    val rawSystemMessage: String? = null,       // Raw system message from platform
+    val isAnnouncement: Boolean = false,
+    val announcementColor: String? = null,
+    val bits: Int = 0
 )
 
 data class StreamInfo(

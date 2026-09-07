@@ -1,6 +1,7 @@
 package com.kongjjj.overlay
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -17,6 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,6 +69,10 @@ class MainActivity : ComponentActivity() {
                 val ttsIgnoreLinks by chatManager.ttsIgnoreLinks.collectAsState()
 
                 val context = LocalContext.current
+                val configuration = LocalConfiguration.current
+                val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                val buttonModifier = if (isLandscape) Modifier.fillMaxWidth(0.5f) else Modifier.fillMaxWidth()
+
                 val packageInfo = remember {
                     try {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -105,7 +111,7 @@ class MainActivity : ComponentActivity() {
                         
                         Button(
                             onClick = { checkPermissionAndStart() },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = buttonModifier
                         ) {
                             Text(getLabel("Open Floating Chat", appLanguage))
                         }
@@ -114,7 +120,7 @@ class MainActivity : ComponentActivity() {
                         
                         OutlinedButton(
                             onClick = { showSettings = true },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = buttonModifier
                         ) {
                             Text(getLabel("Settings", appLanguage))
                         }
@@ -123,7 +129,7 @@ class MainActivity : ComponentActivity() {
 
                         OutlinedButton(
                             onClick = { showLanguageDialog = true },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = buttonModifier
                         ) {
                             Text(getLabel("App Language", appLanguage))
                         }
@@ -135,7 +141,7 @@ class MainActivity : ComponentActivity() {
                                 chatManager.clearChatCache(this@MainActivity)
                                 finishAffinity() 
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = buttonModifier
                         ) {
                             Text(getLabel("Exit App", appLanguage))
                         }
