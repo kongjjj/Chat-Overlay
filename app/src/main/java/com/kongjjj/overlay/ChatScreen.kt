@@ -10,7 +10,9 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -386,6 +388,16 @@ private fun ChatMessageRow(
                         imageLoader = imageLoader, modifier = Modifier.fillMaxSize())
                 })
             }
+            put("system_star", InlineTextContent(
+                Placeholder(fontSize.sp, fontSize.sp, PlaceholderVerticalAlign.TextCenter)
+            ) {
+                Icon(imageVector = Icons.Default.Star, contentDescription = null, tint = Color.White, modifier = Modifier.fillMaxSize())
+            })
+            put("system_flame", InlineTextContent(
+                Placeholder(fontSize.sp, fontSize.sp, PlaceholderVerticalAlign.TextCenter)
+            ) {
+                Icon(imageVector = Icons.Default.Whatshot, contentDescription = null, tint = Color.White, modifier = Modifier.fillMaxSize())
+            })
             segments.filter { it is MessageSegment.EmotePart || it is MessageSegment.BitsPart }
                 .mapNotNull { 
                     when(it) {
@@ -427,8 +439,25 @@ private fun ChatMessageRow(
             } else {
                 // Show System Message first (e.g. for Twitch USERNOTICE)
                 if (!message.rawSystemMessage.isNullOrEmpty()) {
+                    val isStreak = message.twitchMsgId == "viewermilestone"
+                    val isSubOrRaid = when(message.twitchMsgId) {
+                        "sub", "resub", "subgift", "anonsubgift", "submysterygift", 
+                        "giftpaidupgrade", "rewardgift", "anongiftpaidupgrade", 
+                        "primepaidupgrade", "raid", "bitsbadgetier" -> true
+                        else -> false
+                    }
+
+                    if (isStreak) {
+                        appendInlineContent("system_flame", "[flame]")
+                        append(' ')
+                    } else if (isSubOrRaid) {
+                        appendInlineContent("system_star", "[star]")
+                        append(' ')
+                    }
+
+                    val localizedMsg = getLocalizedTwitchSystemMessage(message, appLanguage)
                     withStyle(SpanStyle(color = Color.White.copy(alpha = 0.9f), fontWeight = FontWeight.Normal)) {
-                        append(message.rawSystemMessage)
+                        append(localizedMsg)
                     }
                     if (message.message.isNotEmpty()) {
                         append("\n")
@@ -508,4 +537,43 @@ private fun ChatMessageRow(
             .background(announcementBg)
             .padding(horizontal = 12.dp, vertical = 2.dp)
     )
+}
+
+private fun getLocalizedTwitchSystemMessage(message: ChatMessage, lang: String): String {
+    val raw = message.rawSystemMessage ?: ""
+    if (lang != "zh-TW") return raw
+
+    val tags = message.msgParams
+    val msgId = message.twitchMsgId
+    val user = message.username
+
+    val months = tags["msg-param-cumulative-months"] ?: tags["msg-param-months"]
+    val recipient = tags["msg-param-recipient-display-name"] ?: tags["msg-param-recipient-user-name"]
+    val viewCount = tags["msg-param-viewerCount"]
+    val ritualName = tags["msg-param-ritual-name"]
+    val massGiftCount = tags["msg-param-mass-gift-count"]
+    val milestoneCategory = tags["msg-param-category"]
+    val milestoneValue = tags["msg-param-value"]
+    val multiMonthDuration = tags["msg-param-multimonth-duration"]
+
+    val tierMap = mapOf("1000" to "層級 1", "2000" to "層級 2", "3000" to "層級 3", "Prime" to "Prime")
+    val tier = tierMap[tags["msg-param-sub-plan"]] ?: "層級 1"
+
+    return when (msgId) {
+        "sub" -> "${user} 使用 ${tier} 訂閱了頻道！"
+        "resub" -> {
+            if (multiMonthDuration != null && multiMonthDuration.toIntOrNull() ?: 0 > 1) {
+                "${user} 已預先訂閱 ${tier} x ${multiMonthDuration} 個月。這位使用者已經訂閱了 ${months} 個月！"
+            } else {
+                "${user} 已訂閱 ${tier} 。這位使用者已經訂閱了 ${months} 個月！"
+            }
+        }
+        "subgift" -> "${user} 贈送了 ${tier} 訂閱給 ${recipient}！"
+        "anonsubgift" -> "匿名贊助者 贈送了 ${tier} 訂閱給 ${recipient}！"
+        "submysterygift" -> "${user} 在頻道社群隨機贈送了 ${massGiftCount} 個 ${tier} 訂閱！"
+        "raid" -> "${user} 正與 ${viewCount} 個人一起揪團中。"
+        "ritual" -> if (ritualName == "new_chatter") "歡迎 ${user} 第一次在聊天室發言！" else "${user} 觸發了新活動！"
+        "viewermilestone" -> if (milestoneCategory == "watch-streak") "${user} 達成連續觀賞紀錄！${user} 目前已連續觀賞 ${milestoneValue} 場實況！" else raw
+        else -> raw
+    }
 }

@@ -15,10 +15,13 @@ data class ChatMessage(
     val rawSystemMessage: String? = null,       // Raw system message from platform
     val isAnnouncement: Boolean = false,
     val announcementColor: String? = null,
-    val bits: Int = 0
+    val bits: Int = 0,
+    val twitchMsgId: String? = null,
+    val msgParams: Map<String, String> = emptyMap()
 )
 
 data class StreamInfo(
     val viewers: Int,
-    val createdAt: Long?
+    val createdAt: Long?,
+    val userId: String? = null
 )

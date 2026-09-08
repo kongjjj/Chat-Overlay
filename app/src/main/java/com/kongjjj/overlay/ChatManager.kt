@@ -18,6 +18,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -126,9 +127,11 @@ class ChatManager private constructor(context: Context) {
             }
         }
         
-        // Load emotes
+        // Load emotes and badges
         scope.launch {
-            emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value)
+            val channel = twitchChannel.value
+            val userId = if (channel.isNotEmpty()) fetchTwitchUserId(channel) else null
+            emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, userId)
         }
 
         // Start stream info updates
@@ -217,7 +220,7 @@ class ChatManager private constructor(context: Context) {
                 .post(
                     """
                 {
-                    "query": "query { user(login: \"$channelName\") { stream { viewersCount createdAt } } }"
+                    "query": "query { user(login: \"$channelName\") { id stream { viewersCount createdAt } } }"
                 }
                 """.trimIndent().toRequestBody("application/json; charset=utf-8".toMediaType())
                 )
@@ -229,6 +232,7 @@ class ChatManager private constructor(context: Context) {
                 val json = JSONObject(body.ifBlank { "{}" })
                 val data = json.optJSONObject("data")
                 val user = data?.optJSONObject("user")
+                val userId = user?.optString("id")
                 val stream = user?.optJSONObject("stream")
                 val viewers = stream?.optInt("viewersCount", 0) ?: 0
                 val createdAtStr = stream?.optString("createdAt")
@@ -242,7 +246,7 @@ class ChatManager private constructor(context: Context) {
                         null
                     }
                 } else null
-                StreamInfo(viewers, createdAt)
+                StreamInfo(viewers, createdAt, userId)
             } else {
                 StreamInfo(0, null)
             }
@@ -250,6 +254,27 @@ class ChatManager private constructor(context: Context) {
             Log.e("ChatManager", "Error fetching stream info", e)
             StreamInfo(0, null)
         }
+    }
+
+    private suspend fun fetchTwitchUserId(channelName: String): String? = withContext(Dispatchers.IO) {
+        if (channelName.isBlank()) return@withContext null
+        try {
+            val request = Request.Builder()
+                .url("https://api.ivr.fi/v2/twitch/user?login=$channelName")
+                .build()
+            httpClient.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    val body = response.body.string()
+                    val array = JSONArray(body)
+                    if (array.length() > 0) {
+                        return@withContext array.getJSONObject(0).optString("id")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("ChatManager", "Failed to fetch twitch user id", e)
+        }
+        null
     }
 
     private fun speakMessage(message: ChatMessage) {
@@ -367,8 +392,16 @@ class ChatManager private constructor(context: Context) {
         context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putString("twitch_channel", channel) }
         if (channel.isNotEmpty()) {
             twitchClient.connect(channel)
+            // Reload badges for the new channel
+            scope.launch {
+                val userId = fetchTwitchUserId(channel)
+                emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, userId)
+            }
         } else {
             twitchClient.disconnect()
+            scope.launch {
+                emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, null)
+            }
         }
     }
 
@@ -492,7 +525,9 @@ class ChatManager private constructor(context: Context) {
     }
     
     private suspend fun reloadEmotes() {
-        emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value)
+        val channel = twitchChannel.value
+        val userId = if (channel.isNotEmpty()) fetchTwitchUserId(channel) else null
+        emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, userId)
     }
 
     @OptIn(coil.annotation.ExperimentalCoilApi::class)

@@ -1,5 +1,6 @@
 package com.kongjjj.overlay
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -207,6 +209,7 @@ fun SettingsContent(
     var channelInput by remember(twitchChannel) { mutableStateOf(twitchChannel) }
     var youtubeInput by remember(youtubeChannelId) { mutableStateOf(youtubeChannelId) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -230,6 +233,7 @@ fun SettingsContent(
                             val trimmed = channelInput.trim().lowercase()
                             onSaveChannel(trimmed)
                             keyboardController?.hide()
+                            Toast.makeText(context, getLabel("Saved", appLanguage), Toast.LENGTH_SHORT).show()
                         },
                     )
                 )
@@ -238,6 +242,7 @@ fun SettingsContent(
                         val trimmed = channelInput.trim().lowercase()
                         onSaveChannel(trimmed)
                         keyboardController?.hide()
+                        Toast.makeText(context, getLabel("Saved", appLanguage), Toast.LENGTH_SHORT).show()
                     }
                 ) { Text(getLabel("Save", appLanguage)) }
             }
@@ -259,6 +264,7 @@ fun SettingsContent(
                             val trimmed = youtubeInput.trim()
                             onSaveYoutubeChannelId(trimmed)
                             keyboardController?.hide()
+                            Toast.makeText(context, getLabel("Saved", appLanguage), Toast.LENGTH_SHORT).show()
                         },
                     )
                 )
@@ -267,6 +273,7 @@ fun SettingsContent(
                         val trimmed = youtubeInput.trim()
                         onSaveYoutubeChannelId(trimmed)
                         keyboardController?.hide()
+                        Toast.makeText(context, getLabel("Saved", appLanguage), Toast.LENGTH_SHORT).show()
                     }
                 ) { Text(getLabel("Save", appLanguage)) }
             }
@@ -493,6 +500,7 @@ fun getLabel(key: String, lang: String): String {
         "YouTube Channel ID" to mapOf("zh-TW" to "YouTube 頻道 ID", "en" to "YouTube Channel ID", "ja" to "YouTubeチャンネルID"),
         "Channel Name" to mapOf("zh-TW" to "頻道名稱", "en" to "Channel Name", "ja" to "チャンネル名"),
         "Save" to mapOf("zh-TW" to "儲存", "en" to "Save", "ja" to "保存"),
+        "Saved" to mapOf("zh-TW" to "已儲存", "en" to "Saved", "ja" to "保存されました"),
         "Background Color" to mapOf("zh-TW" to "背景顏色", "en" to "Background Color", "ja" to "背景色"),
         "Transparent" to mapOf("zh-TW" to "透明", "en" to "Transparent", "ja" to "透明"),
         "Black" to mapOf("zh-TW" to "黑色", "en" to "Black", "ja" to "黒"),

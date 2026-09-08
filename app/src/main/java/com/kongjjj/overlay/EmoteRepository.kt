@@ -37,7 +37,8 @@ class EmoteRepository {
     suspend fun loadAll(
         enable7tv: Boolean = true,
         enableBttv: Boolean = true,
-        enableFfz: Boolean = true
+        enableFfz: Boolean = true,
+        twitchChannelId: String? = null
     ) = withContext(Dispatchers.IO) {
         _thirdPartyEmotes.value = emptyMap()
 
@@ -51,7 +52,7 @@ class EmoteRepository {
         loadProvider(enableBttv, ::fetchBTTV)
         loadProvider(enableFfz,  ::fetchFFZ)
 
-        runCatching { fetchTwitchBadges() }
+        runCatching { fetchTwitchBadges(twitchChannelId) }
             .onSuccess { badges -> _twitchBadges.value = badges }
     }
 
@@ -63,6 +64,30 @@ class EmoteRepository {
             if (resp.isSuccessful) resp.body.string() else null
         }
     } catch (_: Exception) { null }
+
+    private fun parseIvrBadges(json: String, map: MutableMap<String, String>) {
+        runCatching {
+            val element = JsonParser.parseString(json)
+            val arr = if (element.isJsonArray) element.asJsonArray else return
+            arr.forEach { setEl ->
+                runCatching {
+                    val setObj = setEl.asJsonObject
+                    val setId = setObj.get("set_id").asString
+                    val versions = setObj.getAsJsonArray("versions")
+                    versions.forEach { verEl ->
+                        runCatching {
+                            val verObj = verEl.asJsonObject
+                            val verId = verObj.get("id").asString
+                            val url = verObj.get("image_url_1x")?.asString ?: verObj.get("image_url_2x")?.asString
+                            if (url != null) {
+                                map["$setId/$verId"] = url
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // ── 7TV global emotes ─────────────────────────────────────────────────────
     private fun fetch7TV(): Map<String, String> {
@@ -132,14 +157,30 @@ class EmoteRepository {
         return map
     }
 
-    // ── Twitch global badges ──────────────────────────────────────────────────
-    private fun fetchTwitchBadges(): Map<String, String> {
+    // ── Twitch global and channel badges ──────────────────────────────────────
+    private fun fetchTwitchBadges(channelId: String? = null): Map<String, String> {
+        val map = mutableMapOf<String, String>()
+
+        // 1. Global Badges from ivr.fi
+        runCatching {
+            get("https://api.ivr.fi/v2/twitch/badges/global")?.let { parseIvrBadges(it, map) }
+        }
+
+        // 2. Channel Badges from ivr.fi
+        if (!channelId.isNullOrBlank()) {
+            runCatching {
+                get("https://api.ivr.fi/v2/twitch/badges/channel?id=$channelId")?.let { parseIvrBadges(it, map) }
+            }
+        }
+
+        if (map.isNotEmpty()) return map
+
+        // 3. Fallback to Twitch API (Legacy)
         val body = get("https://badges.twitch.tv/v1/badges/global/display?language=en")
         if (body != null) {
             runCatching {
                 val root     = JsonParser.parseString(body).asJsonObject
                 val sets     = root.getAsJsonObject("badge_sets")
-                val map      = mutableMapOf<String, String>()
                 sets.entrySet().forEach { (setName, setEl) ->
                     setEl.asJsonObject.getAsJsonObject("versions")
                         .entrySet().forEach { (version, verEl) ->

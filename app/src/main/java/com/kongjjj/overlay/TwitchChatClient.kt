@@ -147,6 +147,7 @@ class TwitchChatClient {
             var systemMsg: String? = null
             var msgParamColor: String? = null
             var bits = 0
+            val msgParams = mutableMapOf<String, String>()
 
             // 1. Strip IRCv3 tags: @key=value;key=value ... <space> rest-of-line
             if (rest.startsWith("@")) {
@@ -171,6 +172,9 @@ class TwitchChatClient {
                         "system-msg"      -> if (value.isNotEmpty()) systemMsg = value.replace("\\s", " ")
                         "msg-param-color" -> if (value.isNotEmpty()) msgParamColor = value
                         "bits"            -> bits = value.toIntOrNull() ?: 0
+                    }
+                    if (key.startsWith("msg-param-")) {
+                        msgParams[key] = value
                     }
                 }
             }
@@ -228,7 +232,9 @@ class TwitchChatClient {
                 rawSystemMessage = systemMsg,
                 isAnnouncement = (command == "USERNOTICE" || twitchMsgId == "announcement" || bits > 0),
                 announcementColor = msgParamColor,
-                bits = bits
+                bits = bits,
+                twitchMsgId = twitchMsgId,
+                msgParams = msgParams
             )
         } catch (_: Exception) {
             return null
