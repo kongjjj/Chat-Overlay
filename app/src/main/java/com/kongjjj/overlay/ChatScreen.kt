@@ -554,20 +554,14 @@ private fun getLocalizedTwitchSystemMessage(message: ChatMessage, lang: String):
     val massGiftCount = tags["msg-param-mass-gift-count"]
     val milestoneCategory = tags["msg-param-category"]
     val milestoneValue = tags["msg-param-value"]
-    val multiMonthDuration = tags["msg-param-multimonth-duration"]
+
 
     val tierMap = mapOf("1000" to "層級 1", "2000" to "層級 2", "3000" to "層級 3", "Prime" to "Prime")
     val tier = tierMap[tags["msg-param-sub-plan"]] ?: "層級 1"
 
     return when (msgId) {
         "sub" -> "${user} 使用 ${tier} 訂閱了頻道！"
-        "resub" -> {
-            if (multiMonthDuration != null && multiMonthDuration.toIntOrNull() ?: 0 > 1) {
-                "${user} 已預先訂閱 ${tier} x ${multiMonthDuration} 個月。這位使用者已經訂閱了 ${months} 個月！"
-            } else {
-                "${user} 已訂閱 ${tier} 。這位使用者已經訂閱了 ${months} 個月！"
-            }
-        }
+        "resub" -> "${user} 已訂閱 ${tier}。這位使用者已經訂閱了 ${months} 個月！"
         "subgift" -> "${user} 贈送了 ${tier} 訂閱給 ${recipient}！"
         "anonsubgift" -> "匿名贊助者 贈送了 ${tier} 訂閱給 ${recipient}！"
         "submysterygift" -> "${user} 在頻道社群隨機贈送了 ${massGiftCount} 個 ${tier} 訂閱！"
