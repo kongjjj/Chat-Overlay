@@ -40,6 +40,9 @@
 ![Chat-Overlay](pics/Screenshot_4.jpg)
 - UI消失後。
 ![Chat-Overlay](pics/Screenshot_5.jpg)
+- 其他截圖
+![Chat-Overlay](pics/Screenshot_8.jpg)
+  
 
 ---
 
