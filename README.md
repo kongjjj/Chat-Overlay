@@ -42,7 +42,7 @@
 ![Chat-Overlay](pics/Screenshot_5.jpg)
 - 其他截圖
 ![Chat-Overlay](pics/Screenshot_8.jpg)
-  
+![Chat-Overlay](pics/Screenshot_9.jpg)  
 
 ---
 
