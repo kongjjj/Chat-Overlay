@@ -29,7 +29,7 @@ An Android Transparent Youtube/Twitch Chat viewer app for IRL streaming.
 - ✔️ Twitch Viewer Count & Stream Duration Display.
 - ✔️ Display support for Twitch channel announcements, watch streaks, subscriptions, raids, and other special messages.
 
-![Chat-Overlay](pics/Screenshot_1EN.jpg)
+![Chat-Overlay](pics/Screenshot_7EN.jpg)
 
 ---
 
