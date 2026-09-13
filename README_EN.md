@@ -26,7 +26,7 @@ An Android Transparent Youtube/Twitch Chat viewer app for IRL streaming.
 - ✔️ Font size, shadow, line spacing, usernames, and emoji size can be adjusted individually.
 - ✔️ The transparent chat box can be freely moved and resized.
 - ✔️ The UI will automatically hide after 3 seconds, and only the comment section will remain visible. Clicking the left half of the comment section will bring back the UI.
-- ✔️ Twitch Viewer Count & Stream Duration Display.
+- ✔️ Twitch Stream info (Viewer Count & Stream Duration) Display.
 - ✔️ Display support for Twitch channel announcements, watch streaks, subscriptions, raids, and other special messages.
 
 ![Chat-Overlay](pics/Screenshot_7EN.jpg)
