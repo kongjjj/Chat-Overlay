@@ -520,7 +520,7 @@ fun getLabel(key: String, lang: String): String {
         "Emote Sources" to mapOf("zh-TW" to "表情符號來源", "en" to "Emote Sources", "ja" to "エモートソース"),
         "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの語言"),
         "Show Timestamp" to mapOf("zh-TW" to "顯示留言時間", "en" to "Show Timestamp", "ja" to "タイムスタンプを表示"),
-        "Show Stream Info" to mapOf("zh-TW" to "顯示直播資訊", "en" to "Show Stream Info", "ja" to "配信情報を表示"),
+        "Show Stream Info" to mapOf("zh-TW" to "顯示 Twitch 直播資訊", "en" to "Show Twitch Stream Info", "ja" to "Twitch 配信情報を表示"),
         "Text Shadow" to mapOf("zh-TW" to "文字陰影", "en" to "Text Shadow", "ja" to "文字の影"),
         "Shadow Radius" to mapOf("zh-TW" to "陰影深度", "en" to "Shadow Radius", "ja" to "影のぼかし"),
         "Shadow Offset X" to mapOf("zh-TW" to "陰影偏移 X", "en" to "Shadow Offset X", "ja" to "影のオフセット X"),

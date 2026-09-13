@@ -12,8 +12,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Launch
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -113,36 +118,72 @@ class MainActivity : ComponentActivity() {
                             onClick = { checkPermissionAndStart() },
                             modifier = buttonModifier
                         ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Launch,
+                                contentDescription = null,
+                                modifier = Modifier.size(ButtonDefaults.IconSize)
+                            )
+                            Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
                             Text(getLabel("Open Floating Chat", appLanguage))
                         }
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        OutlinedButton(
+                        Button(
                             onClick = { showSettings = true },
-                            modifier = buttonModifier
+                            modifier = buttonModifier,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            )
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = null,
+                                modifier = Modifier.size(ButtonDefaults.IconSize)
+                            )
+                            Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
                             Text(getLabel("Settings", appLanguage))
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        OutlinedButton(
+                        Button(
                             onClick = { showLanguageDialog = true },
-                            modifier = buttonModifier
+                            modifier = buttonModifier,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            )
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.Language,
+                                contentDescription = null,
+                                modifier = Modifier.size(ButtonDefaults.IconSize)
+                            )
+                            Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
                             Text(getLabel("App Language", appLanguage))
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        OutlinedButton(
+                        Button(
                             onClick = { 
                                 chatManager.clearChatCache(this@MainActivity)
                                 finishAffinity() 
                             },
-                            modifier = buttonModifier
+                            modifier = buttonModifier,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            )
                         ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = null,
+                                modifier = Modifier.size(ButtonDefaults.IconSize)
+                            )
+                            Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
                             Text(getLabel("Exit App", appLanguage))
                         }
 
@@ -309,6 +350,9 @@ fun LanguageSelectionDialog(
             TextButton(onClick = onDismiss) {
                 Text(getLabel("Close", appLanguage))
             }
-        }
+        },
+        shape = RoundedCornerShape(16.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 6.dp
     )
 }
