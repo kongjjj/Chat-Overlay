@@ -12,7 +12,7 @@
 ![GitHub top language](https://img.shields.io/github/languages/top/kongjjj/Chat-Overlay?&style=for-the-badge)
 [![Release](https://img.shields.io/github/release/kongjjj/Chat-Overlay?color=0000FF&label=Release&style=for-the-badge)](https://github.com/kongjjj/Chat-Overlay/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/kongjjj/Chat-Overlay/total?label=Downloads&style=for-the-badge&color=lightgreen)](https://github.com/kongjjj/Chat-Overlay/releases)
-
+<img src="https://img.shields.io/github/check-runs/sysadminsmedia/homebox/main" alt="Github Checks"/>
 
 </div>
 
