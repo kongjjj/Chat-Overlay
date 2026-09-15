@@ -355,7 +355,7 @@ private fun scanWords(text: String, emotes: Map<String, String>, useStrictBounda
 }
 
 private val urlRegex = Regex(
-    "((?:https?://|www\\.)[\\w.\\-?&#=+%!:/~]+|(?:^|\\s)(?:[\\w\\-]+\\.)+(?:com|tv|net|org|io|me|gov|edu|tw|hk|jp|live)(?:/[\\w.\\-?&#=+%!:/~]*)?)",
+    "((?:https?://|www\\.)[\\w.\\-?&#=+%!:/~@]+|(?:^|\\s)(?:[\\w\\-]+\\.)+(?:com|tv|net|org|io|me|gov|edu|tw|hk|jp|live)(?:/[\\w.\\-?&#=+%!:/~@]*)?)",
     RegexOption.IGNORE_CASE
 )
 
