@@ -45,13 +45,13 @@ class ChatManager private constructor(context: Context) {
     val shadowRadius = MutableStateFlow(DEFAULT_SHADOW_RADIUS)
     val shadowOffsetX = MutableStateFlow(DEFAULT_SHADOW_OFFSET_X)
     val shadowOffsetY = MutableStateFlow(DEFAULT_SHADOW_OFFSET_Y)
-    val animatedEmotes = MutableStateFlow(true)
-    val enable7tv = MutableStateFlow(true)
-    val enableBttv = MutableStateFlow(true)
-    val enableFfz = MutableStateFlow(true)
+    val animatedEmotes = MutableStateFlow(value = true)
+    val enable7tv = MutableStateFlow(value = true)
+    val enableBttv = MutableStateFlow(value = true)
+    val enableFfz = MutableStateFlow(value = true)
     val backgroundColor = MutableStateFlow("transparent") // "transparent" or "black"
     val appLanguage = MutableStateFlow("zh-TW") // "zh-TW", "en", "ja"
-    val showTimestamp = MutableStateFlow(false)
+    val showTimestamp = MutableStateFlow(value = false)
     val showStreamInfo = MutableStateFlow(DEFAULT_SHOW_STREAM_INFO)
 
     // Stream Info state
@@ -67,10 +67,10 @@ class ChatManager private constructor(context: Context) {
     val systemMessages: StateFlow<List<ChatMessage>> = _systemMessages.asStateFlow()
 
     // TTS Settings
-    val ttsEnabled = MutableStateFlow(false)
-    val ttsIgnoreSender = MutableStateFlow(false)
-    val ttsIgnoreEmoji = MutableStateFlow(false)
-    val ttsIgnoreLinks = MutableStateFlow(false)
+    val ttsEnabled = MutableStateFlow(value = false)
+    val ttsIgnoreSender = MutableStateFlow(value = false)
+    val ttsIgnoreEmoji = MutableStateFlow(value = false)
+    val ttsIgnoreLinks = MutableStateFlow(value = false)
     val ttsLanguage = MutableStateFlow("zh-HK") // Default to Cantonese
 
     private val spokenMessageIds = mutableSetOf<String>()
@@ -131,7 +131,7 @@ class ChatManager private constructor(context: Context) {
         scope.launch {
             val channel = twitchChannel.value
             val userId = if (channel.isNotEmpty()) fetchTwitchUserId(channel) else null
-            emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, userId)
+            emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, userId, channel)
         }
 
         // Start stream info updates
@@ -143,7 +143,7 @@ class ChatManager private constructor(context: Context) {
         viewerUpdateJob = scope.launch {
             while (isActive) {
                 val channel = twitchChannel.value
-                if (channel.isNotBlank() && channel != "yourchannel") {
+                if (channel.isNotBlank() && (channel != "yourchannel")) {
                     var info: StreamInfo? = null
                     try {
                         info = withTimeout(5.seconds) {
@@ -222,7 +222,7 @@ class ChatManager private constructor(context: Context) {
                 {
                     "query": "query { user(login: \"$channelName\") { id stream { viewersCount createdAt } } }"
                 }
-                """.trimIndent().toRequestBody("application/json; charset=utf-8".toMediaType())
+                """.trimIndent().toRequestBody("application/json; charset=utf-8".toMediaType()),
                 )
                 .build()
 
@@ -305,7 +305,7 @@ class ChatManager private constructor(context: Context) {
             
             val emojiRegex = Regex("[\\uD83C-\\uDBFF\\uDC00-\\uDFFF]|\\p{So}")
             
-            messageContent = segments.filterIsInstance<MessageSegment.TextPart>()
+            messageContent = segments.asSequence().filterIsInstance<MessageSegment.TextPart>()
                 .joinToString(" ") { it.text.replace(emojiRegex, "") }
                 .trim()
         }
@@ -395,12 +395,12 @@ class ChatManager private constructor(context: Context) {
             // Reload badges for the new channel
             scope.launch {
                 val userId = fetchTwitchUserId(channel)
-                emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, userId)
+                emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, userId, channel)
             }
         } else {
             twitchClient.disconnect()
             scope.launch {
-                emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, null)
+                emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, null, null)
             }
         }
     }
@@ -527,7 +527,7 @@ class ChatManager private constructor(context: Context) {
     private suspend fun reloadEmotes() {
         val channel = twitchChannel.value
         val userId = if (channel.isNotEmpty()) fetchTwitchUserId(channel) else null
-        emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, userId)
+        emoteRepository.loadAll(enable7tv.value, enableBttv.value, enableFfz.value, userId, channel)
     }
 
     @OptIn(coil.annotation.ExperimentalCoilApi::class)

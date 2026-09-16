@@ -587,14 +587,14 @@ private fun getLocalizedTwitchSystemMessage(message: ChatMessage, lang: String):
     val tier = tierMap[tags["msg-param-sub-plan"]] ?: "層級 1"
 
     return when (msgId) {
-        "sub" -> "${user} 使用 ${tier} 訂閱了頻道！"
-        "resub" -> "${user} 已訂閱 ${tier}。這位使用者已經訂閱了 ${months} 個月！"
-        "subgift" -> "${user} 贈送了 ${tier} 訂閱給 ${recipient}！"
-        "anonsubgift" -> "匿名贊助者 贈送了 ${tier} 訂閱給 ${recipient}！"
-        "submysterygift" -> "${user} 在頻道社群隨機贈送了 ${massGiftCount} 個 ${tier} 訂閱！"
-        "raid" -> "${user} 正與 ${viewCount} 個人一起揪團中。"
-        "ritual" -> if (ritualName == "new_chatter") "歡迎 ${user} 第一次在聊天室發言！" else "${user} 觸發了新活動！"
-        "viewermilestone" -> if (milestoneCategory == "watch-streak") "${user} 達成連續觀賞紀錄！${user} 目前已連續觀賞 ${milestoneValue} 場實況！" else raw
+        "sub" -> "$user 使用 $tier 訂閱了頻道！"
+        "resub" -> "$user 已訂閱 $tier。這位使用者已經訂閱了 $months 個月！"
+        "subgift" -> "$user 贈送了 $tier 訂閱給 $recipient！"
+        "anonsubgift" -> "匿名贊助者 贈送了 $tier 訂閱給 $recipient！"
+        "submysterygift" -> "$user 在頻道社群隨機贈送了 $massGiftCount 個 $tier 訂閱！"
+        "raid" -> "$user 正與 $viewCount 個人一起揪團中。"
+        "ritual" -> if (ritualName == "new_chatter") "歡迎 $user 第一次在聊天室發言！" else "$user 觸發了新活動！"
+        "viewermilestone" -> if (milestoneCategory == "watch-streak") "$user 達成連續觀賞紀錄！$user 目前已連續觀賞 $milestoneValue 場實況！" else raw
         else -> raw
     }
 }
