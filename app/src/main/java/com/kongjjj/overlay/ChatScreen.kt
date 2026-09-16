@@ -1,11 +1,13 @@
 package com.kongjjj.overlay
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
@@ -341,23 +343,43 @@ private fun ChatMessageRow(
         }.filter { it.isNotEmpty() }
     }
 
-    val announcementBg = remember(message.isAnnouncement, message.announcementColor) {
-        if (message.isAnnouncement) {
-            val baseColor = when (message.announcementColor?.uppercase()) {
-                "BLUE" -> Color(0xFF00E5FF)
-                "GREEN" -> Color(0xFF00FF7F)
-                "ORANGE" -> Color(0xFFFF8200)
-                "PURPLE" -> Color(0xFF9146FF)
-                else -> Color(0xFF9146FF) // PRIMARY
+    // Special message styling (Announcements & UserNotices & Bits)
+    val isSpecialMessage = remember(message.isAnnouncement, message.twitchMsgId, message.bits) {
+        message.isAnnouncement || message.twitchMsgId != null || message.bits > 0
+    }
+    val announcementBgColor = remember(message.isAnnouncement, message.announcementColor, message.bits, message.twitchMsgId) {
+        if (!isSpecialMessage) return@remember Color.Transparent
+        when {
+            message.isAnnouncement -> {
+                when (message.announcementColor?.uppercase()) {
+                    "BLUE" -> Color(0xFF00ADFF).copy(alpha = 0.15f)
+                    "GREEN" -> Color(0xFF00FF7F).copy(alpha = 0.15f)
+                    "ORANGE" -> Color(0xFFFF8C00).copy(alpha = 0.15f)
+                    "PURPLE" -> Color(0xFFA020F0).copy(alpha = 0.15f)
+                    else -> Color(0xFF9146FF).copy(alpha = 0.15f)
+                }
             }
-            baseColor.copy(alpha = 0.25f)
-        } else {
-            Color.Transparent
+            else -> Color(0xFF9146FF).copy(alpha = 0.1f)
+        }
+    }
+    val announcementBorderColor = remember(message.isAnnouncement, message.announcementColor, message.bits, message.twitchMsgId) {
+        if (!isSpecialMessage) return@remember Color.Transparent
+        when {
+            message.isAnnouncement -> {
+                when (message.announcementColor?.uppercase()) {
+                    "BLUE" -> Color(0xFF00ADFF)
+                    "GREEN" -> Color(0xFF00FF7F)
+                    "ORANGE" -> Color(0xFFFF8C00)
+                    "PURPLE" -> Color(0xFFA020F0)
+                    else -> Color(0xFF9146FF)
+                }
+            }
+            else -> Color(0xFF9146FF).copy(alpha = 0.5f)
         }
     }
 
     val segments: List<MessageSegment> = remember(message.id, thirdPartyEmotes.size) {
-        parseMessageSegments(message.message, message.emotesTag, thirdPartyEmotes, message.youtubeEmotes, message.bits > 0)
+        parseMessageSegments(message.message, message.emotesTag, thirdPartyEmotes, message.youtubeEmotes)
     }
 
     val timestampText = remember(message.timestamp, showTimestamp) {
@@ -534,7 +556,12 @@ private fun ChatMessageRow(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .background(announcementBg)
+            .padding(vertical = 1.dp)
+            .background(announcementBgColor, shape = RoundedCornerShape(4.dp))
+            .then(
+                if (isSpecialMessage) Modifier.border(1.dp, announcementBorderColor, RoundedCornerShape(4.dp))
+                else Modifier
+            )
             .padding(horizontal = 12.dp, vertical = 2.dp)
     )
 }

@@ -222,8 +222,7 @@ fun parseMessageSegments(
     message:          String,
     emotesTag:        String?,
     thirdPartyEmotes: Map<String, String>,
-    youtubeEmotes:    Map<String, String> = emptyMap(),
-    hasBits:          Boolean = false
+    youtubeEmotes:    Map<String, String> = emptyMap()
 ): List<MessageSegment> {
     
     val twitchRanges = mutableListOf<Triple<Int, Int, String>>()
@@ -271,13 +270,9 @@ fun parseMessageSegments(
         else listOf(seg)
     }
 
-    val stage4 = if (hasBits) {
-        stage3.flatMap { seg ->
-            if (seg is MessageSegment.TextPart) scanForBits(seg.text)
-            else listOf(seg)
-        }
-    } else {
-        stage3
+    val stage4 = stage3.flatMap { seg ->
+        if (seg is MessageSegment.TextPart) scanForBits(seg.text)
+        else listOf(seg)
     }
 
     return stage4.flatMap { seg ->
@@ -289,6 +284,7 @@ fun parseMessageSegments(
 private fun scanForBits(text: String): List<MessageSegment> {
     val result = mutableListOf<MessageSegment>()
     var cursor = 0
+    // Matches cheer1, cheer100, etc.
     val bitsRegex = Regex("\\bcheer(\\d+)\\b", RegexOption.IGNORE_CASE)
     
     bitsRegex.findAll(text).forEach { match ->
@@ -298,17 +294,16 @@ private fun scanForBits(text: String): List<MessageSegment> {
         
         val amount = match.groupValues[1].toIntOrNull() ?: 1
         val color = when {
+            amount >= 100000 -> "gold"
             amount >= 10000 -> "red"
             amount >= 5000  -> "blue"
             amount >= 1000  -> "green"
             amount >= 100   -> "purple"
-            else            -> "grey"
+            else            -> "gray"
         }
-        // Force purple if the user wants it, but let's try to be accurate to tiers first.
-        // Actually, the user specifically said "cheer 用紫色動畫bits圖案". I will prioritize purple.
-        val finalColor = if (amount >= 1) "purple" else color 
         
-        val url = "https://static-cdn.jtvnw.net/bits/dark/animated/$finalColor/1"
+        // Twitch bits CDN animated URLs: 1 (small), 2 (medium), 4 (large)
+        val url = "https://static-cdn.jtvnw.net/bits/dark/animated/$color/1"
         result.add(MessageSegment.BitsPart(amount, url))
         cursor = match.range.last + 1
     }
