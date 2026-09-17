@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -501,36 +502,41 @@ private fun ChatMessageRow(
                         }
                     }
 
-                    withStyle(SpanStyle(color = nameColor, fontWeight = FontWeight.SemiBold, fontSize = usernameSize.sp)) {
-                        append(message.username)
-                        if (message.login != null && !message.login.equals(message.username, ignoreCase = true)) {
-                            append(" (${message.login})")
-                        }
-                    }
-
-                    // YouTube: badges AFTER name
-                    if (message.platform == "youtube") {
-                        badgeUrls.forEachIndexed { i, url ->
-                            if (i == 0) append(' ')
-                            appendInlineContent(url, "[badge]")
-                            if (i < badgeUrls.lastIndex) append('\u2009')
-                        }
-                    }
-
-                    append(": ")
-                    segments.forEach { seg ->
-                        when (seg) {
-                            is MessageSegment.TextPart -> append(seg.text)
-                            is MessageSegment.EmotePart -> appendInlineContent(seg.url, "[${seg.name}]")
-                            is MessageSegment.BitsPart -> {
-                                appendInlineContent(seg.url, "[bits]")
-                                withStyle(SpanStyle(color = Color(0xFFBF94FF), fontWeight = FontWeight.Bold)) {
-                                    append(" ${seg.amount}")
-                                }
+                    val actionStyle = if (message.isAction) SpanStyle(fontStyle = FontStyle.Italic) else SpanStyle()
+                    
+                    withStyle(actionStyle) {
+                        withStyle(SpanStyle(color = nameColor, fontWeight = FontWeight.SemiBold, fontSize = usernameSize.sp)) {
+                            append(message.username)
+                            if (message.login != null && !message.login.equals(message.username, ignoreCase = true)) {
+                                append(" (${message.login})")
                             }
-                            is MessageSegment.LinkPart -> {
-                                withStyle(SpanStyle(color = TiffanyBlue, textDecoration = TextDecoration.Underline)) {
-                                    append(seg.text)
+                        }
+
+                        // YouTube: badges AFTER name
+                        if (message.platform == "youtube") {
+                            badgeUrls.forEachIndexed { i, url ->
+                                if (i == 0) append(' ')
+                                appendInlineContent(url, "[badge]")
+                                if (i < badgeUrls.lastIndex) append('\u2009')
+                            }
+                        }
+
+                        if (message.isAction) append(" ") else append(": ")
+                        
+                        segments.forEach { seg ->
+                            when (seg) {
+                                is MessageSegment.TextPart -> append(seg.text)
+                                is MessageSegment.EmotePart -> appendInlineContent(seg.url, "[${seg.name}]")
+                                is MessageSegment.BitsPart -> {
+                                    appendInlineContent(seg.url, "[bits]")
+                                    withStyle(SpanStyle(color = Color(0xFFBF94FF), fontWeight = FontWeight.Bold)) {
+                                        append(" ${seg.amount}")
+                                    }
+                                }
+                                is MessageSegment.LinkPart -> {
+                                    withStyle(SpanStyle(color = TiffanyBlue, textDecoration = TextDecoration.Underline)) {
+                                        append(seg.text)
+                                    }
                                 }
                             }
                         }

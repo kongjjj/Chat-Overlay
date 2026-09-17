@@ -78,7 +78,10 @@ class TwitchChatClient {
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
-                    text.lines().forEach { handleLine(it.trim()) }
+                    text.lines().forEach { line ->
+                        val trimmed = line.trim('\r', '\n')
+                        if (trimmed.isNotEmpty()) handleLine(trimmed)
+                    }
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
@@ -202,7 +205,7 @@ class TwitchChatClient {
             // paramsPart looks like: #channel :message text OR #channel message
 
             // 4. Extract Message (the trailing parameter)
-            val message = when {
+            var message = when {
                 paramsPart.contains(" :") -> {
                     paramsPart.substring(paramsPart.indexOf(" :") + 2)
                 }
@@ -217,6 +220,15 @@ class TwitchChatClient {
 
             if (message.isEmpty() && systemMsg.isNullOrEmpty()) return null
 
+            var isAction = false
+            if (message.startsWith("\u0001ACTION ") && message.endsWith("\u0001")) {
+                message = message.substring(8, message.length - 1)
+                isAction = true
+            } else if (message.startsWith("ACTION ")) {
+                message = message.substring(7)
+                isAction = true
+            }
+
             val badges = badgesStr?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
 
             return ChatMessage(
@@ -229,6 +241,7 @@ class TwitchChatClient {
                 badgeTags  = badges,
                 timestamp  = serverTimestamp,
                 platform   = "twitch",
+                isAction   = isAction,
                 rawSystemMessage = systemMsg,
                 isAnnouncement = (command == "USERNOTICE" || twitchMsgId == "announcement" || bits > 0),
                 announcementColor = msgParamColor,
