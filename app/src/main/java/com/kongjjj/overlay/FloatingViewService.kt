@@ -153,11 +153,15 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         val widthPx = (320 * metrics.density).toInt()
         val heightPx = (180 * metrics.density).toInt()
 
+        val keepScreenOn = chatManager.keepScreenOn.value
+        val flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        val finalFlags = if (keepScreenOn) flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON else flags
+
         params = WindowManager.LayoutParams(
             widthPx,
             heightPx,
             layoutFlag,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            finalFlags,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
@@ -166,6 +170,21 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
 
         windowManager.addView(floatingView, params)
+
+        serviceScope.launch {
+            chatManager.keepScreenOn.collect { keepOn ->
+                if (::params.isInitialized && ::floatingView.isInitialized) {
+                    if (keepOn) {
+                        params.flags = params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    } else {
+                        params.flags = params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
+                    }
+                    try {
+                        windowManager.updateViewLayout(floatingView, params)
+                    } catch (_: Exception) {}
+                }
+            }
+        }
 
         startHideTimer()
 

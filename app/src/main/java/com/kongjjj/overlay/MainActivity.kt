@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
                 val appLanguage by chatManager.appLanguage.collectAsState()
                 val showTimestamp by chatManager.showTimestamp.collectAsState()
                 val showStreamInfo by chatManager.showStreamInfo.collectAsState()
+                val keepScreenOn by chatManager.keepScreenOn.collectAsState()
                 val ttsEnabled by chatManager.ttsEnabled.collectAsState()
                 val ttsLanguage by chatManager.ttsLanguage.collectAsState()
                 val ttsIgnoreSender by chatManager.ttsIgnoreSender.collectAsState()
@@ -225,6 +226,7 @@ class MainActivity : ComponentActivity() {
                             appLanguage = appLanguage,
                             showTimestamp = showTimestamp,
                             showStreamInfo = showStreamInfo,
+                            keepScreenOn = keepScreenOn,
                             textShadow = chatManager.textShadow.collectAsState().value,
                             shadowRadius = chatManager.shadowRadius.collectAsState().value,
                             shadowOffsetX = chatManager.shadowOffsetX.collectAsState().value,
@@ -247,6 +249,7 @@ class MainActivity : ComponentActivity() {
                             onBackgroundColorChange = { chatManager.saveBackgroundColor(it, this@MainActivity) },
                             onShowTimestampChange = { chatManager.saveShowTimestamp(it, this@MainActivity) },
                             onShowStreamInfoChange = { chatManager.saveShowStreamInfo(it, this@MainActivity) },
+                            onKeepScreenOnChange = { chatManager.saveKeepScreenOn(it, this@MainActivity) },
                             onTextShadowChange = { chatManager.saveTextShadow(it, this@MainActivity) },
                             onShadowRadiusChange = { chatManager.saveShadowRadius(it, this@MainActivity) },
                             onShadowOffsetXChange = { chatManager.saveShadowOffsetX(it, this@MainActivity) },

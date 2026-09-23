@@ -53,6 +53,7 @@ class ChatManager private constructor(context: Context) {
     val appLanguage = MutableStateFlow("zh-TW") // "zh-TW", "en", "ja"
     val showTimestamp = MutableStateFlow(value = false)
     val showStreamInfo = MutableStateFlow(DEFAULT_SHOW_STREAM_INFO)
+    val keepScreenOn = MutableStateFlow(DEFAULT_KEEP_SCREEN_ON)
 
     // Stream Info state
     val viewersCount = MutableStateFlow(0)
@@ -105,6 +106,7 @@ class ChatManager private constructor(context: Context) {
         appLanguage.value = prefs.getString("app_language", "zh-TW") ?: "zh-TW"
         showTimestamp.value = prefs.getBoolean("show_timestamp", false)
         showStreamInfo.value = prefs.getBoolean("show_stream_info", DEFAULT_SHOW_STREAM_INFO)
+        keepScreenOn.value = prefs.getBoolean("keep_screen_on", DEFAULT_KEEP_SCREEN_ON)
         
         ttsEnabled.value = prefs.getBoolean("tts_enabled", false)
         ttsIgnoreSender.value = prefs.getBoolean("tts_ignore_sender", false)
@@ -496,6 +498,11 @@ class ChatManager private constructor(context: Context) {
     fun saveShowStreamInfo(show: Boolean, context: Context) {
         showStreamInfo.value = show
         context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("show_stream_info", show) }
+    }
+
+    fun saveKeepScreenOn(enabled: Boolean, context: Context) {
+        keepScreenOn.value = enabled
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("keep_screen_on", enabled) }
     }
 
     fun saveTtsEnabled(enabled: Boolean, context: Context) {

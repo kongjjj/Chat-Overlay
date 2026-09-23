@@ -40,6 +40,7 @@ fun SettingsDialog(
     appLanguage: String,
     showTimestamp: Boolean,
     showStreamInfo: Boolean,
+    keepScreenOn: Boolean,
     textShadow: Boolean,
     shadowRadius: Float,
     shadowOffsetX: Float,
@@ -62,6 +63,7 @@ fun SettingsDialog(
     onBackgroundColorChange: (String) -> Unit,
     onShowTimestampChange: (Boolean) -> Unit,
     onShowStreamInfoChange: (Boolean) -> Unit,
+    onKeepScreenOnChange: (Boolean) -> Unit,
     onTextShadowChange: (Boolean) -> Unit,
     onShadowRadiusChange: (Float) -> Unit,
     onShadowOffsetXChange: (Float) -> Unit,
@@ -120,6 +122,7 @@ fun SettingsDialog(
                         appLanguage = appLanguage,
                         showTimestamp = showTimestamp,
                         showStreamInfo = showStreamInfo,
+                        keepScreenOn = keepScreenOn,
                         textShadow = textShadow,
                         shadowRadius = shadowRadius,
                         shadowOffsetX = shadowOffsetX,
@@ -142,6 +145,7 @@ fun SettingsDialog(
                         onBackgroundColorChange = onBackgroundColorChange,
                         onShowTimestampChange = onShowTimestampChange,
                         onShowStreamInfoChange = onShowStreamInfoChange,
+                        onKeepScreenOnChange = onKeepScreenOnChange,
                         onTextShadowChange = onTextShadowChange,
                         onShadowRadiusChange = onShadowRadiusChange,
                         onShadowOffsetXChange = onShadowOffsetXChange,
@@ -174,6 +178,7 @@ fun SettingsContent(
     appLanguage: String,
     showTimestamp: Boolean,
     showStreamInfo: Boolean,
+    keepScreenOn: Boolean,
     textShadow: Boolean,
     shadowRadius: Float,
     shadowOffsetX: Float,
@@ -196,6 +201,7 @@ fun SettingsContent(
     onBackgroundColorChange: (String) -> Unit,
     onShowTimestampChange: (Boolean) -> Unit,
     onShowStreamInfoChange: (Boolean) -> Unit,
+    onKeepScreenOnChange: (Boolean) -> Unit,
     onTextShadowChange: (Boolean) -> Unit,
     onShadowRadiusChange: (Float) -> Unit,
     onShadowOffsetXChange: (Float) -> Unit,
@@ -308,6 +314,12 @@ fun SettingsContent(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(getLabel("Show Stream Info", appLanguage), style = MaterialTheme.typography.bodyMedium)
             Switch(checked = showStreamInfo, onCheckedChange = onShowStreamInfoChange)
+        }
+
+        // Keep Screen On
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(getLabel("Keep Screen On", appLanguage), style = MaterialTheme.typography.bodyMedium)
+            Switch(checked = keepScreenOn, onCheckedChange = onKeepScreenOnChange)
         }
 
         HorizontalDivider()
@@ -521,6 +533,7 @@ fun getLabel(key: String, lang: String): String {
         "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの語言"),
         "Show Timestamp" to mapOf("zh-TW" to "顯示留言時間", "en" to "Show Timestamp", "ja" to "タイムスタンプを表示"),
         "Show Stream Info" to mapOf("zh-TW" to "顯示 Twitch 直播資訊", "en" to "Show Twitch Stream Info", "ja" to "Twitch 配信情報を表示"),
+        "Keep Screen On" to mapOf("zh-TW" to "保持螢幕長亮", "en" to "Keep Screen On", "ja" to "画面を常時オン"),
         "Text Shadow" to mapOf("zh-TW" to "文字陰影", "en" to "Text Shadow", "ja" to "文字の影"),
         "Shadow Radius" to mapOf("zh-TW" to "陰影深度", "en" to "Shadow Radius", "ja" to "影のぼかし"),
         "Shadow Offset X" to mapOf("zh-TW" to "陰影偏移 X", "en" to "Shadow Offset X", "ja" to "影のオフセット X"),
