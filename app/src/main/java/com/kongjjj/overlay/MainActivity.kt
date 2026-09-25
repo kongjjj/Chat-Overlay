@@ -67,12 +67,14 @@ class MainActivity : ComponentActivity() {
                 val appLanguage by chatManager.appLanguage.collectAsState()
                 val showTimestamp by chatManager.showTimestamp.collectAsState()
                 val showStreamInfo by chatManager.showStreamInfo.collectAsState()
+                val openLinksInBrowser by chatManager.openLinksInBrowser.collectAsState()
                 val keepScreenOn by chatManager.keepScreenOn.collectAsState()
                 val ttsEnabled by chatManager.ttsEnabled.collectAsState()
                 val ttsLanguage by chatManager.ttsLanguage.collectAsState()
                 val ttsIgnoreSender by chatManager.ttsIgnoreSender.collectAsState()
                 val ttsIgnoreEmoji by chatManager.ttsIgnoreEmoji.collectAsState()
                 val ttsIgnoreLinks by chatManager.ttsIgnoreLinks.collectAsState()
+                val ttsOnlySubOrCheer by chatManager.ttsOnlySubOrCheer.collectAsState()
 
                 val context = LocalContext.current
                 val configuration = LocalConfiguration.current
@@ -226,6 +228,7 @@ class MainActivity : ComponentActivity() {
                             appLanguage = appLanguage,
                             showTimestamp = showTimestamp,
                             showStreamInfo = showStreamInfo,
+                            openLinksInBrowser = openLinksInBrowser,
                             keepScreenOn = keepScreenOn,
                             textShadow = chatManager.textShadow.collectAsState().value,
                             shadowRadius = chatManager.shadowRadius.collectAsState().value,
@@ -236,6 +239,7 @@ class MainActivity : ComponentActivity() {
                             ttsIgnoreSender = ttsIgnoreSender,
                             ttsIgnoreEmoji = ttsIgnoreEmoji,
                             ttsIgnoreLinks = ttsIgnoreLinks,
+                            ttsOnlySubOrCheer = ttsOnlySubOrCheer,
                             onSaveChannel = { chatManager.saveTwitchChannel(it, this@MainActivity) },
                             onSaveYoutubeChannelId = { chatManager.saveYoutubeChannelId(it, this@MainActivity) },
                             onFontSizeChange = { chatManager.saveFontSize(it, this@MainActivity) },
@@ -249,6 +253,7 @@ class MainActivity : ComponentActivity() {
                             onBackgroundColorChange = { chatManager.saveBackgroundColor(it, this@MainActivity) },
                             onShowTimestampChange = { chatManager.saveShowTimestamp(it, this@MainActivity) },
                             onShowStreamInfoChange = { chatManager.saveShowStreamInfo(it, this@MainActivity) },
+                            onOpenLinksInBrowserChange = { chatManager.saveOpenLinksInBrowser(it, this@MainActivity) },
                             onKeepScreenOnChange = { chatManager.saveKeepScreenOn(it, this@MainActivity) },
                             onTextShadowChange = { chatManager.saveTextShadow(it, this@MainActivity) },
                             onShadowRadiusChange = { chatManager.saveShadowRadius(it, this@MainActivity) },
@@ -259,6 +264,7 @@ class MainActivity : ComponentActivity() {
                             onTtsIgnoreSenderChange = { chatManager.saveTtsIgnoreSender(it, this@MainActivity) },
                             onTtsIgnoreEmojiChange = { chatManager.saveTtsIgnoreEmoji(it, this@MainActivity) },
                             onTtsIgnoreLinksChange = { chatManager.saveTtsIgnoreLinks(it, this@MainActivity) },
+                            onTtsOnlySubOrCheerChange = { chatManager.saveTtsOnlySubOrCheer(it, this@MainActivity) },
                         ) {
                             showSettings = false
                         }

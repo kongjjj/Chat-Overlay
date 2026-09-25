@@ -12,6 +12,8 @@ import android.os.IBinder
 import android.util.DisplayMetrics
 import android.view.*
 import android.widget.FrameLayout
+import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -225,6 +227,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                     val isVisible by uiVisible
 
                     val showStreamInfo by chatManager.showStreamInfo.collectAsState()
+                    val openLinksInBrowser by chatManager.openLinksInBrowser.collectAsState()
                     val viewersCount by chatManager.viewersCount.collectAsState()
                     val uptimeText by chatManager.uptimeText.collectAsState()
                     
@@ -263,6 +266,12 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                             showStreamInfo = showStreamInfo,
                             viewersCount = viewersCount,
                             uptimeText = uptimeText,
+                            openLinksInBrowser = openLinksInBrowser,
+                            onResetHideTimer = { resetHideTimer() },
+                            onLinkClicked = { url ->
+                                collapseToBubble()
+                                openUrlInBrowser(url)
+                            },
                         ) {
                             chatManager.connect(this@FloatingViewService)
                         }
@@ -302,17 +311,7 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         }
 
         floatingView.findViewById<View>(R.id.btn_collapse).setOnClickListener {
-            resetHideTimer()
-            if (!isCollapsed) {
-                savedWidth = params.width
-                savedHeight = params.height
-                isCollapsed = true
-                mainContentContainer.isVisible = false
-                minimizedIcon.isVisible = true
-                params.width = (60 * metrics.density).toInt()
-                params.height = (60 * metrics.density).toInt()
-                windowManager.updateViewLayout(floatingView, params)
-            }
+            collapseToBubble()
         }
 
         minimizedIcon.setOnClickListener {
@@ -470,6 +469,36 @@ class FloatingViewService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private fun hideFloatingView() {
         if (!::floatingView.isInitialized) return
         floatingView.isVisible = false
+    }
+
+    private fun collapseToBubble() {
+        if (!::floatingView.isInitialized) return
+        val mainContentContainer = floatingView.findViewById<View>(R.id.main_content_container) ?: return
+        val minimizedIcon = floatingView.findViewById<View>(R.id.minimized_icon) ?: return
+        val metrics = resources.displayMetrics
+        resetHideTimer()
+        if (!isCollapsed) {
+            savedWidth = params.width
+            savedHeight = params.height
+            isCollapsed = true
+            mainContentContainer.isVisible = false
+            minimizedIcon.isVisible = true
+            params.width = (60 * metrics.density).toInt()
+            params.height = (60 * metrics.density).toInt()
+            windowManager.updateViewLayout(floatingView, params)
+        }
+    }
+
+    private fun openUrlInBrowser(url: String) {
+        try {
+            val uri = url.toUri()
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+        } catch (_: Exception) {
+            Toast.makeText(this, "無法開啟連結", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

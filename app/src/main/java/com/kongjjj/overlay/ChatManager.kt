@@ -53,6 +53,7 @@ class ChatManager private constructor(context: Context) {
     val appLanguage = MutableStateFlow("zh-TW") // "zh-TW", "en", "ja"
     val showTimestamp = MutableStateFlow(value = false)
     val showStreamInfo = MutableStateFlow(DEFAULT_SHOW_STREAM_INFO)
+    val openLinksInBrowser = MutableStateFlow(DEFAULT_OPEN_LINKS_IN_BROWSER)
     val keepScreenOn = MutableStateFlow(DEFAULT_KEEP_SCREEN_ON)
 
     // Stream Info state
@@ -72,6 +73,7 @@ class ChatManager private constructor(context: Context) {
     val ttsIgnoreSender = MutableStateFlow(value = false)
     val ttsIgnoreEmoji = MutableStateFlow(value = false)
     val ttsIgnoreLinks = MutableStateFlow(value = false)
+    val ttsOnlySubOrCheer = MutableStateFlow(value = false)
     val ttsLanguage = MutableStateFlow("zh-HK") // Default to Cantonese
 
     private val spokenMessageIds = mutableSetOf<String>()
@@ -106,12 +108,14 @@ class ChatManager private constructor(context: Context) {
         appLanguage.value = prefs.getString("app_language", "zh-TW") ?: "zh-TW"
         showTimestamp.value = prefs.getBoolean("show_timestamp", false)
         showStreamInfo.value = prefs.getBoolean("show_stream_info", DEFAULT_SHOW_STREAM_INFO)
+        openLinksInBrowser.value = prefs.getBoolean("open_links_in_browser", DEFAULT_OPEN_LINKS_IN_BROWSER)
         keepScreenOn.value = prefs.getBoolean("keep_screen_on", DEFAULT_KEEP_SCREEN_ON)
         
         ttsEnabled.value = prefs.getBoolean("tts_enabled", false)
         ttsIgnoreSender.value = prefs.getBoolean("tts_ignore_sender", false)
         ttsIgnoreEmoji.value = prefs.getBoolean("tts_ignore_emoji", false)
         ttsIgnoreLinks.value = prefs.getBoolean("tts_ignore_links", false)
+        ttsOnlySubOrCheer.value = prefs.getBoolean("tts_only_sub_or_cheer", false)
         ttsLanguage.value = prefs.getString("tts_language", "zh-HK") ?: "zh-HK"
 
         // Set initial TTS language
@@ -282,6 +286,13 @@ class ChatManager private constructor(context: Context) {
     private fun speakMessage(message: ChatMessage) {
         if (message.id == "system_instruction") return
         if (spokenMessageIds.contains(message.id)) return
+
+        if (ttsOnlySubOrCheer.value) {
+            val isSub = message.twitchMsgId in setOf("sub", "resub", "subgift", "anonsubgift", "submysterygift", "giftpaidupgrade", "primepaidupgrade")
+            val isCheer = message.bits > 0
+            if (!isSub && !isCheer) return
+            if (message.message.isBlank()) return
+        }
 
         // Ignore messages that arrived before we started listening (history)
         val msgTimestamp = message.timestamp ?: System.currentTimeMillis()
@@ -505,6 +516,11 @@ class ChatManager private constructor(context: Context) {
         context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("keep_screen_on", enabled) }
     }
 
+    fun saveOpenLinksInBrowser(enabled: Boolean, context: Context) {
+        openLinksInBrowser.value = enabled
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("open_links_in_browser", enabled) }
+    }
+
     fun saveTtsEnabled(enabled: Boolean, context: Context) {
         ttsEnabled.value = enabled
         context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("tts_enabled", enabled) }
@@ -529,6 +545,11 @@ class ChatManager private constructor(context: Context) {
     fun saveTtsIgnoreLinks(enabled: Boolean, context: Context) {
         ttsIgnoreLinks.value = enabled
         context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("tts_ignore_links", enabled) }
+    }
+
+    fun saveTtsOnlySubOrCheer(enabled: Boolean, context: Context) {
+        ttsOnlySubOrCheer.value = enabled
+        context.getSharedPreferences("OverlayPrefs", Context.MODE_PRIVATE).edit { putBoolean("tts_only_sub_or_cheer", enabled) }
     }
     
     private suspend fun reloadEmotes() {

@@ -11,3 +11,4 @@ const val DEFAULT_SHADOW_OFFSET_X = 2f
 const val DEFAULT_SHADOW_OFFSET_Y = 2f
 const val DEFAULT_SHOW_STREAM_INFO = true
 const val DEFAULT_KEEP_SCREEN_ON = true
+const val DEFAULT_OPEN_LINKS_IN_BROWSER = true

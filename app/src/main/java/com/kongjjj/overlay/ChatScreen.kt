@@ -2,6 +2,7 @@ package com.kongjjj.overlay
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,10 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +67,9 @@ fun ChatScreen(
     shadowOffsetX: Float = DEFAULT_SHADOW_OFFSET_X,
     shadowOffsetY: Float = DEFAULT_SHADOW_OFFSET_Y,
     showChrome: Boolean = true,
+    openLinksInBrowser: Boolean = true,
+    onResetHideTimer: (() -> Unit)? = null,
+    onLinkClicked: ((String) -> Unit)? = null,
     onConnect: () -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -295,6 +301,9 @@ fun ChatScreen(
                         shadowRadius = shadowRadius,
                         shadowOffsetX = shadowOffsetX,
                         shadowOffsetY = shadowOffsetY,
+                        openLinksInBrowser = openLinksInBrowser,
+                        onResetHideTimer = onResetHideTimer,
+                        onLinkClicked = onLinkClicked,
                         imageLoader = imageLoader
                     )
                 }
@@ -318,6 +327,9 @@ private fun ChatMessageRow(
     shadowRadius: Float,
     shadowOffsetX: Float,
     shadowOffsetY: Float,
+    openLinksInBrowser: Boolean = true,
+    onResetHideTimer: (() -> Unit)? = null,
+    onLinkClicked: ((String) -> Unit)? = null,
     imageLoader: ImageLoader
 ) {
     val badgeSize = (fontSize * 1.1f).sp
@@ -414,12 +426,12 @@ private fun ChatMessageRow(
             put("system_star", InlineTextContent(
                 Placeholder(fontSize.sp, fontSize.sp, PlaceholderVerticalAlign.TextCenter)
             ) {
-                Icon(imageVector = Icons.Default.Star, contentDescription = null, tint = Color.White, modifier = Modifier.fillMaxSize())
+                Icon(imageVector = Icons.Default.Star, contentDescription = null, tint = Color(0xFFFF8C00), modifier = Modifier.fillMaxSize())
             })
             put("system_flame", InlineTextContent(
                 Placeholder(fontSize.sp, fontSize.sp, PlaceholderVerticalAlign.TextCenter)
             ) {
-                Icon(imageVector = Icons.Default.Whatshot, contentDescription = null, tint = Color.White, modifier = Modifier.fillMaxSize())
+                Icon(imageVector = Icons.Default.Whatshot, contentDescription = null, tint = Color(0xFFFF8C00), modifier = Modifier.fillMaxSize())
             })
             segments.filter { it is MessageSegment.EmotePart || it is MessageSegment.BitsPart }
                 .mapNotNull { 
@@ -479,7 +491,7 @@ private fun ChatMessageRow(
                     }
 
                     val localizedMsg = getLocalizedTwitchSystemMessage(message, appLanguage)
-                    withStyle(SpanStyle(color = Color.White.copy(alpha = 0.9f), fontWeight = FontWeight.Normal)) {
+                    withStyle(SpanStyle(color = Color(0xFFFF8C00), fontWeight = FontWeight.Bold)) {
                         append(localizedMsg)
                     }
                     if (message.message.isNotEmpty()) {
@@ -534,9 +546,11 @@ private fun ChatMessageRow(
                                     }
                                 }
                                 is MessageSegment.LinkPart -> {
+                                    pushStringAnnotation(tag = "URL", annotation = seg.url)
                                     withStyle(SpanStyle(color = TiffanyBlue, textDecoration = TextDecoration.Underline)) {
                                         append(seg.text)
                                     }
+                                    pop()
                                 }
                             }
                         }
@@ -545,6 +559,8 @@ private fun ChatMessageRow(
             }
         }
     }
+
+    var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
     Text(
         text = annotatedText,
@@ -560,6 +576,7 @@ private fun ChatMessageRow(
                 blurRadius = shadowRadius
             ) else null
         ),
+        onTextLayout = { layoutResult = it },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 1.dp)
@@ -569,6 +586,25 @@ private fun ChatMessageRow(
                 else Modifier
             )
             .padding(horizontal = 12.dp, vertical = 2.dp)
+            .pointerInput(onResetHideTimer, openLinksInBrowser, annotatedText, onLinkClicked) {
+                detectTapGestures { offset ->
+                    val halfWidth = size.width / 2f
+                    if (offset.x < halfWidth) {
+                        onResetHideTimer?.invoke()
+                    }
+                    if (openLinksInBrowser && onLinkClicked != null) {
+                        layoutResult?.let { textLayoutResult ->
+                            val position = textLayoutResult.getOffsetForPosition(offset)
+                            annotatedText
+                                .getStringAnnotations(tag = "URL", start = position, end = position)
+                                .firstOrNull()
+                                ?.let { annotation ->
+                                    onLinkClicked(annotation.item)
+                                }
+                        }
+                    }
+                }
+            }
     )
 }
 

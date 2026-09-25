@@ -40,6 +40,7 @@ fun SettingsDialog(
     appLanguage: String,
     showTimestamp: Boolean,
     showStreamInfo: Boolean,
+    openLinksInBrowser: Boolean = true,
     keepScreenOn: Boolean,
     textShadow: Boolean,
     shadowRadius: Float,
@@ -50,6 +51,7 @@ fun SettingsDialog(
     ttsIgnoreSender: Boolean,
     ttsIgnoreEmoji: Boolean,
     ttsIgnoreLinks: Boolean,
+    ttsOnlySubOrCheer: Boolean,
     onSaveChannel: (String) -> Unit,
     onSaveYoutubeChannelId: (String) -> Unit,
     onFontSizeChange: (Float) -> Unit,
@@ -63,6 +65,7 @@ fun SettingsDialog(
     onBackgroundColorChange: (String) -> Unit,
     onShowTimestampChange: (Boolean) -> Unit,
     onShowStreamInfoChange: (Boolean) -> Unit,
+    onOpenLinksInBrowserChange: (Boolean) -> Unit = {},
     onKeepScreenOnChange: (Boolean) -> Unit,
     onTextShadowChange: (Boolean) -> Unit,
     onShadowRadiusChange: (Float) -> Unit,
@@ -73,6 +76,7 @@ fun SettingsDialog(
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
     onTtsIgnoreEmojiChange: (Boolean) -> Unit,
     onTtsIgnoreLinksChange: (Boolean) -> Unit,
+    onTtsOnlySubOrCheerChange: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -122,6 +126,7 @@ fun SettingsDialog(
                         appLanguage = appLanguage,
                         showTimestamp = showTimestamp,
                         showStreamInfo = showStreamInfo,
+                        openLinksInBrowser = openLinksInBrowser,
                         keepScreenOn = keepScreenOn,
                         textShadow = textShadow,
                         shadowRadius = shadowRadius,
@@ -132,6 +137,7 @@ fun SettingsDialog(
                         ttsIgnoreSender = ttsIgnoreSender,
                         ttsIgnoreEmoji = ttsIgnoreEmoji,
                         ttsIgnoreLinks = ttsIgnoreLinks,
+                        ttsOnlySubOrCheer = ttsOnlySubOrCheer,
                         onSaveChannel = onSaveChannel,
                         onSaveYoutubeChannelId = onSaveYoutubeChannelId,
                         onFontSizeChange = onFontSizeChange,
@@ -145,6 +151,7 @@ fun SettingsDialog(
                         onBackgroundColorChange = onBackgroundColorChange,
                         onShowTimestampChange = onShowTimestampChange,
                         onShowStreamInfoChange = onShowStreamInfoChange,
+                        onOpenLinksInBrowserChange = onOpenLinksInBrowserChange,
                         onKeepScreenOnChange = onKeepScreenOnChange,
                         onTextShadowChange = onTextShadowChange,
                         onShadowRadiusChange = onShadowRadiusChange,
@@ -155,6 +162,7 @@ fun SettingsDialog(
                         onTtsIgnoreSenderChange = onTtsIgnoreSenderChange,
                         onTtsIgnoreEmojiChange = onTtsIgnoreEmojiChange,
                         onTtsIgnoreLinksChange = onTtsIgnoreLinksChange,
+                        onTtsOnlySubOrCheerChange = onTtsOnlySubOrCheerChange,
                     )
                 }
             }
@@ -178,6 +186,7 @@ fun SettingsContent(
     appLanguage: String,
     showTimestamp: Boolean,
     showStreamInfo: Boolean,
+    openLinksInBrowser: Boolean,
     keepScreenOn: Boolean,
     textShadow: Boolean,
     shadowRadius: Float,
@@ -188,6 +197,7 @@ fun SettingsContent(
     ttsIgnoreSender: Boolean,
     ttsIgnoreEmoji: Boolean,
     ttsIgnoreLinks: Boolean,
+    ttsOnlySubOrCheer: Boolean,
     onSaveChannel: (String) -> Unit,
     onSaveYoutubeChannelId: (String) -> Unit,
     onFontSizeChange: (Float) -> Unit,
@@ -201,6 +211,7 @@ fun SettingsContent(
     onBackgroundColorChange: (String) -> Unit,
     onShowTimestampChange: (Boolean) -> Unit,
     onShowStreamInfoChange: (Boolean) -> Unit,
+    onOpenLinksInBrowserChange: (Boolean) -> Unit,
     onKeepScreenOnChange: (Boolean) -> Unit,
     onTextShadowChange: (Boolean) -> Unit,
     onShadowRadiusChange: (Float) -> Unit,
@@ -211,6 +222,7 @@ fun SettingsContent(
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
     onTtsIgnoreEmojiChange: (Boolean) -> Unit,
     onTtsIgnoreLinksChange: (Boolean) -> Unit,
+    onTtsOnlySubOrCheerChange: (Boolean) -> Unit,
 ) {
     var channelInput by remember(twitchChannel) { mutableStateOf(twitchChannel) }
     var youtubeInput by remember(youtubeChannelId) { mutableStateOf(youtubeChannelId) }
@@ -316,6 +328,12 @@ fun SettingsContent(
             Switch(checked = showStreamInfo, onCheckedChange = onShowStreamInfoChange)
         }
 
+        // Open Links in Browser
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(getLabel("Open Links in Browser", appLanguage), style = MaterialTheme.typography.bodyMedium)
+            Switch(checked = openLinksInBrowser, onCheckedChange = onOpenLinksInBrowserChange)
+        }
+
         // Keep Screen On
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(getLabel("Keep Screen On", appLanguage), style = MaterialTheme.typography.bodyMedium)
@@ -415,6 +433,11 @@ fun SettingsContent(
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(getLabel("Ignore Links", appLanguage), style = MaterialTheme.typography.bodyMedium)
                     Switch(checked = ttsIgnoreLinks, onCheckedChange = onTtsIgnoreLinksChange)
+                }
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(getLabel("Only Sub/Cheer Messages", appLanguage), style = MaterialTheme.typography.bodyMedium)
+                    Switch(checked = ttsOnlySubOrCheer, onCheckedChange = onTtsOnlySubOrCheerChange)
                 }
             }
         }
@@ -522,6 +545,7 @@ fun getLabel(key: String, lang: String): String {
         "Ignore Sender" to mapOf("zh-TW" to "忽略使用者名稱", "en" to "Ignore Sender", "ja" to "送信者を無視"),
         "Ignore Emoji" to mapOf("zh-TW" to "忽略 Emoji 朗讀", "en" to "Ignore Emoji", "ja" to "絵文字を無視"),
         "Ignore Links" to mapOf("zh-TW" to "忽略超連結", "en" to "Ignore Links", "ja" to "リンクを無視"),
+        "Only Sub/Cheer Messages" to mapOf("zh-TW" to "只讀取訂閱與小奇點訊息", "en" to "Only Read Sub & Cheer", "ja" to "サブスク・ビッドのみ読み上げ"),
         "Font Size" to mapOf("zh-TW" to "字型大小", "en" to "Font Size", "ja" to "フォントサイズ"),
         "Username Size" to mapOf("zh-TW" to "使用者名稱大小", "en" to "Username Size", "ja" to "ユーザー名サイズ"),
         "Line Spacing" to mapOf("zh-TW" to "行距", "en" to "Line Spacing", "ja" to "行間"),
@@ -533,6 +557,7 @@ fun getLabel(key: String, lang: String): String {
         "App Language" to mapOf("zh-TW" to "程式語言", "en" to "App Language", "ja" to "アプリの語言"),
         "Show Timestamp" to mapOf("zh-TW" to "顯示留言時間", "en" to "Show Timestamp", "ja" to "タイムスタンプを表示"),
         "Show Stream Info" to mapOf("zh-TW" to "顯示 Twitch 直播資訊", "en" to "Show Twitch Stream Info", "ja" to "Twitch 配信情報を表示"),
+        "Open Links in Browser" to mapOf("zh-TW" to "點擊開啟超連結", "en" to "Open Links in Browser", "ja" to "ハイパーリンクを開く"),
         "Keep Screen On" to mapOf("zh-TW" to "保持螢幕長亮", "en" to "Keep Screen On", "ja" to "画面を常時オン"),
         "Text Shadow" to mapOf("zh-TW" to "文字陰影", "en" to "Text Shadow", "ja" to "文字の影"),
         "Shadow Radius" to mapOf("zh-TW" to "陰影深度", "en" to "Shadow Radius", "ja" to "影のぼかし"),
